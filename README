@@ -1,0 +1,24 @@
+NAME
+    App::Bootstrap:Perl - Bootstrap Perl inclusive CPAN from git
+
+=head1 ABOUT
+
+The script bootstraps Perl installations inclusive a CPAN environment
+from git.
+
+It was originally developed to be used by
+L<Benchmark::Perl::Formance|Benchmark::Perl::Formance> but now lives
+on its own.
+
+It should work for Perl versions from 5.8.x to blead. For 5.8.x it
+cherry-picks a few patches to fix some known build issues.
+
+AUTHOR
+    Steffen Schwigon, "<ss5 at renormalist.net>"
+
+COPYRIGHT & LICENSE
+    Copyright 2011 Steffen Schwigon, all rights reserved.
+
+    This program is free software; you can redistribute it and/or
+    modify it under the same terms as Perl itself.
+
