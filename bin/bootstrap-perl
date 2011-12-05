@@ -97,7 +97,7 @@ Configure CPAN to use these mirrors:
   $ bootstrap-perl -m file:///home/ss5/MINICPAN/ -m ftp://ftp.rub.de/pub/CPAN/
   $ bootstrap-perl -m file:///home/ss5/MINICPAN/,ftp://ftp.rub.de/pub/CPAN/
 
-(Options can be repeated and allow comma separated lists.)
+(Option can be repeated and allow comma separated lists.)
 
 Install these modules from CPAN:
 
@@ -105,7 +105,16 @@ Install these modules from CPAN:
   $ bootstrap-perl -M YAML::Syck -M Digest::SHA1 -M IO::Tty -M LWP
   $ bootstrap-perl -M YAML::Syck,Digest::SHA1 -M IO::Tty,LWP
 
-(Options can be repeated and allow comma separated lists.)
+(Option can be repeated and allow comma separated lists.)
+
+=head3 run scripts
+
+Run these scripts relative to built <PREFIX>/bin/:
+
+  $ bootstrap-perl --run tapper-testsuite-benchmark-perlformance
+  $ bootstrap-perl -r tapper-testsuite-benchmark-perlformance -r primes.pl
+
+(Option can be repeated and allow comma separated lists.)
 
 =head1 ABOUT
 
@@ -247,11 +256,13 @@ my $ok = GetOptions (
                      'dry|n'        => \$dry,
                      'mirror|m=s@'  => \@mirrors,
                      'module|M=s@'  => \@modules,
+                     'run|r=s@'     => \@runscripts,
                     );
 
 # modules/mirros can be comma-separated
 my @MODULES     = map { chomp; $_ } map { split(qr/,/, $_) } (@modules ? @modules : @default_modules);
 my @CPANMIRRORS = map { chomp; $_ } map { split(qr/,/, $_) } (@mirrors ? @mirrors : @default_mirrors);
+my @RUNSCRIPTS  = map { chomp; $_ } map { split(qr/,/, $_) } (@runscripts ? @runscripts : ());
 
 # ========== build dependencies ==========
 
@@ -472,7 +483,10 @@ foreach my $module (@MODULES) {
         print_and_execute qq!$CPAN $module!;
 }
 
-# Run Perl::Formance
+# Run scripts from inside the just installed Perl
+foreach my $script (@RUNSCRIPTS) {
+        print_and_execute qq!$PREFIX/bin/runscripts!;
+}
 # print_and_execute qq!$PREFIX/bin/tapper-testsuite-benchmark-perlformance!;
 
 __DATA__
