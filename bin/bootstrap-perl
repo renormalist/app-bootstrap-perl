@@ -484,8 +484,8 @@ foreach my $module (@MODULES) {
 }
 
 # Run scripts from inside the just installed Perl
-foreach my $script (@RUNSCRIPTS) {
-        print_and_execute qq!$PREFIX/bin/runscripts!;
+foreach my $runscript (@RUNSCRIPTS) {
+        print_and_execute qq!$PREFIX/bin/$runscript!;
 }
 # print_and_execute qq!$PREFIX/bin/tapper-testsuite-benchmark-perlformance!;
 
