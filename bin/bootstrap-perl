@@ -227,7 +227,9 @@ my @default_modules = (qw( Digest::SHA1
                            Tapper::TestSuite::Benchmark::Perl::Formance
                         ));
 
-my @default_mirrors = (qw( http://perlformance.net/CPAN/
+# http://perlformance.net/CPAN/
+my @default_mirrors = (qw(
+                         http://rub.de/ftp/pub/CPAN/
                         ));
 
 sub print_and_execute {
