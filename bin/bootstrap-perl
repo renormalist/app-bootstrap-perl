@@ -265,17 +265,19 @@ my @RUNSCRIPTS  = map { chomp; $_ } map { split(qr/,/, $_) } (@runscripts ? @run
 
 # my $APTGETOPTIONS ='-o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --yes';
 # my $APTGET        = "DEBIAN_FRONTEND=noninteractive; export DEBIAN_FRONTEND ; sudo apt-get $APTGETOPTIONS";
-# 
-# print_and_execute "$APTGET install make";
-# print_and_execute "$APTGET install patch";
-# print_and_execute "$APTGET install makepatch";
-# print_and_execute "$APTGET install curl";
-# print_and_execute "$APTGET install wget";
-# print_and_execute "$APTGET install rsync";
-# print_and_execute "$APTGET install gcc";
-# print_and_execute "$APTGET install perl-modules";
-# print_and_execute "$APTGET install libsqlite3-dev";
-# print_and_execute "$APTGET install linux-source-2.6";
+
+print "# To install build tools use:"."\n";
+print "  apt-get install make"."\n";
+print "  apt-get install patch"."\n";
+print "  apt-get install makepatch"."\n";
+print "  apt-get install curl"."\n";
+print "  apt-get install wget"."\n";
+print "  apt-get install rsync"."\n";
+print "  apt-get install gcc"."\n";
+print "  apt-get install g++"."\n";
+print "  apt-get install perl-modules"."\n";
+print "  apt-get install libsqlite3-dev"."\n";
+print "  apt-get install linux-source-2.6"."\n";
 
 # ========== prepare ==========
 
