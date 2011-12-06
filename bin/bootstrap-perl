@@ -206,6 +206,7 @@ my $test                = 0;
 my $jobs                = $threadcount;
 my @mirrors;
 my @modules;
+my @runscripts;
 
 my $DISTROPREFSSRC1     = "$build_path/cpanpm-distroprefs/cpanpm/distroprefs";
 my $DISTROPREFSSRC2     = "$build_path/cpanpm-distroprefs/renormalist/distroprefs";
