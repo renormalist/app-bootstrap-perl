@@ -180,20 +180,12 @@ under the same terms as Perl itself.
 use strict;
 use warnings;
 
-use FindBin qw($Bin);
 use Getopt::Long ":config", "no_ignore_case", "bundling";
 
 # apt-get install libgmp3-dev
 
-my $source_path; # = "./";
-$source_path            = $Bin unless ( $source_path && -e $source_path );
-
 my $HOME                = $ENV{HOME};
 
-my $source_pkg_basename = "perl.tar.bz2"; # just a snapshot of git repo to save clone time, should also work without this
-my $source_pkg          = "$source_path/$source_pkg_basename";
-
-my $cpan_cfg            = "$source_path/CPAN-Config.pm";
 my $build_path          = "/tmp/bootstrap-perl-build";
 my $build_path_perl     = "$build_path/perl";
 my $giturl              = "git://github.com/mirrors/perl.git";
@@ -206,6 +198,7 @@ my $dry;
 my $prefix;
 my $prefixbase          = "/opt";
 my $version             = "blead";
+my $sourcetgz           = "/var/tmp/perl.tar.gz";
 my $usethreads          = 1;
 my $bit64               = 1;
 my $help                = 0;
@@ -248,6 +241,7 @@ my $ok = GetOptions (
                      "prefix=s"     => \$prefix,
                      "prefixbase=s" => \$prefixbase,
                      "version=s"    => \$version,
+                     "sourcetgz=s"  => \$sourcetgz,
                      "usethreads!"  => \$usethreads,
                      "use64bit!"    => \$bit64,
                      "help|h"       => \$help,
@@ -289,9 +283,9 @@ print_and_execute "mkdir -p $build_path";
 if ( $build_path_perl && -e $build_path_perl ) {
         print_and_execute "cd $build_path_perl ; git checkout blead ; git pull";
 } else {
-        if (-e $source_pkg)
+        if (-e $sourcetgz)
         {
-                print_and_execute "cd $build_path ; tar xjf $source_pkg";
+                print_and_execute "cd $build_path ; tar xzf $sourcetgz";
         } else {
                 print_and_execute "cd $build_path ; git clone $giturl";
         }
