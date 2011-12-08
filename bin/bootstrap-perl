@@ -217,8 +217,10 @@ my @mirrors;
 my @modules;
 my @runscripts;
 
-my $DISTROPREFSSRC1     = "$build_path/cpanpm-distroprefs/cpanpm/distroprefs";
-my $DISTROPREFSSRC2     = "$build_path/cpanpm-distroprefs/renormalist/distroprefs";
+my $DISTROPREFSREPO     = "git://github.com/renormalist/cpanpm-distroprefs.git";
+my $DISTROPREFSSRCBASE  = "$build_path";
+my $DISTROPREFSSRC1     = "$DISTROPREFSSRCBASE/cpanpm-distroprefs/cpanpm/distroprefs";
+my $DISTROPREFSSRC2     = "$DISTROPREFSSRCBASE/cpanpm-distroprefs/renormalist/distroprefs";
 my $DISTROPREFSURL      = 'http://cpansearch.perl.org/src/ANDK/CPAN-1.9800/distroprefs/';
 my $DISTROPREFSDIR      = $prefixbase."/cpan/prefs"; # TODO: CPAN-Config is hardwired, not yet aware of $prefixbase!
 
@@ -473,6 +475,17 @@ print_and_execute "ln -sf $POD2TEXT $PREFIX/bin/pod2text";
 
 # ========== cpan ==========
 
+# distroprefs: get all from git
+print_and_execute "mkdir -p $DISTROPREFSSRCBASE";
+print_and_execute "cd $DISTROPREFSSRCBASE ; git clone $DISTROPREFSREPO";
+print_and_execute "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs ; git pull";
+print_and_execute "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs ; git submodule update --init --recursive";
+print_and_execute "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs ; git pull";
+# distroprefs: merge our flavour
+print_and_execute qq!mkdir -p $DISTROPREFSDIR!;
+print_and_execute qq!rsync -r $DISTROPREFSSRC1/ $DISTROPREFSDIR/!;
+print_and_execute qq!rsync -r $DISTROPREFSSRC2/ $DISTROPREFSDIR/!;
+
 # Configure CPAN initially
 my $CFG = `$PERLDOC -l CPAN | sed -e "s/CPAN\.pm/CPAN\\/Config.pm/"`; chomp $CFG;
 
@@ -491,11 +504,6 @@ print_and_execute qq!echo "force install CPAN" | $PERL -MCPAN -e shell!;
 
 # configure
 print_and_execute qq!echo "o conf auto_commit 1 ; o conf commit"                     | $PERL -MCPAN -e shell!;
-
-# find and copy distroprefs
-print_and_execute qq!mkdir -p $DISTROPREFSDIR!;
-print_and_execute qq!rsync -r $DISTROPREFSSRC1/ $DISTROPREFSDIR/!;
-print_and_execute qq!rsync -r $DISTROPREFSSRC2/ $DISTROPREFSDIR/!;
 
 # once upon a time the cpan exe missed the executable bit - set it to be sure
 print_and_execute qq!chmod +x $CPAN!;
