@@ -56,7 +56,7 @@ Use the unified naming schema but not under C</opt>:
 Provide the distro for which to install known build dependencies, like
 gcc, git, make, etc.:
 
- $ bootstrap-perl --installprefs=debian
+ $ bootstrap-perl --installdeps=debian
 
 Currently there is only one: C<debian>. Simply send me a patch for
 your preferred distro, it's easy.
