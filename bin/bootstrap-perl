@@ -509,6 +509,7 @@ print_and_execute qq!echo "o conf auto_commit 1 ; o conf commit"                
 print_and_execute qq!chmod +x $CPAN!;
 
 # install extended cpan toolchain
+print_and_execute qq! echo "install CPAN::SQLite"              | $PERL -MCPAN -e shell!;
 print_and_execute qq! echo "install YAML"                      | $PERL -MCPAN -e shell!;
 print_and_execute qq! echo "install YAML::Syck"                | $PERL -MCPAN -e shell!;
 print_and_execute qq! echo "install IO::Tty"                   | $PERL -MCPAN -e shell!;
@@ -595,7 +596,7 @@ $CPAN::Config = {
   'trust_test_report_history' => q[0],
   'unzip' => q[],
   'urllist' => [qw[__MIRRORS__]],
-  'use_sqlite' => q[0],
+  'use_sqlite' => q[1],
   'wget' => q[/usr/bin/wget],
   'yaml_load_code' => q[0],
 };
