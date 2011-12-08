@@ -225,18 +225,7 @@ my $DISTROPREFSURL      = 'http://cpansearch.perl.org/src/ANDK/CPAN-1.9800/distr
 my $DISTROPREFSDIR      = $prefixbase."/cpan/prefs"; # TODO: CPAN-Config is hardwired, not yet aware of $prefixbase!
 
 # Perl::Formance modules and some explicit dependencies
-my @default_modules = (qw( Digest::SHA1
-                           DB_File
-                           Mail::SPF
-                           Mail::DKIM
-                           IP::Country
-                           Net::Ident
-                           IO::Socket::INET6
-                           Encode::Detect
-                           Benchmark::Perl::Formance
-                           Bundle::PerlFormance
-                           Tapper::TestSuite::Benchmark::Perl::Formance
-                        ));
+my @default_modules = (qw( ));
 
 # http://perlformance.net/CPAN/
 my @default_mirrors = (qw(
