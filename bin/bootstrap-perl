@@ -500,6 +500,7 @@ print_and_execute qq!chmod +x $CPAN!;
 # install extended cpan toolchain
 print_and_execute qq! echo "install CPAN::SQLite"              | $PERL -MCPAN -e shell!;
 print_and_execute qq! echo "install YAML"                      | $PERL -MCPAN -e shell!;
+print_and_execute qq{if ! $PERL -MYAML -e1 ; then echo "force install YAML" | $PERL -MCPAN -e shell ; fi };
 print_and_execute qq! echo "install YAML::Syck"                | $PERL -MCPAN -e shell!;
 print_and_execute qq! echo "install IO::Tty"                   | $PERL -MCPAN -e shell!;
 print_and_execute qq! echo "install Expect"                    | $PERL -MCPAN -e shell!;
