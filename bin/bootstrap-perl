@@ -51,6 +51,16 @@ Use the unified naming schema but not under C</opt>:
 
   $ bootstrap-perl --prefixbase /foo/bar
 
+=head3 install build dependencies
+
+Provide the distro for which to install known build dependencies, like
+gcc, git, make, etc.:
+
+ $ bootstrap-perl --installprefs=debian
+
+Currently there is only one: C<debian>. Simply send me a patch for
+your preferred distro, it's easy.
+
 =head3 parallel build
 
 Use this many parallel jobs to build:
@@ -182,8 +192,6 @@ use warnings;
 
 use Getopt::Long ":config", "no_ignore_case", "bundling";
 
-# apt-get install libgmp3-dev
-
 my $HOME                = $ENV{HOME};
 
 my $build_path          = "/tmp/bootstrap-perl-build";
@@ -198,6 +206,7 @@ my $dry;
 my $prefix;
 my $prefixbase          = "/opt";
 my $version             = "blead";
+my $installdeps;
 my $sourcetgz           = "/var/tmp/perl.tar.gz";
 my $usethreads          = 1;
 my $bit64               = 1;
@@ -244,6 +253,7 @@ my $ok = GetOptions (
                      "prefix=s"     => \$prefix,
                      "prefixbase=s" => \$prefixbase,
                      "version=s"    => \$version,
+                     "installdeps=s" => \$installdeps,
                      "sourcetgz=s"  => \$sourcetgz,
                      "usethreads!"  => \$usethreads,
                      "use64bit!"    => \$bit64,
@@ -263,21 +273,42 @@ my @RUNSCRIPTS  = map { chomp; $_ } map { split(qr/,/, $_) } (@runscripts ? @run
 
 # ========== build dependencies ==========
 
-# my $APTGETOPTIONS ='-o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --yes';
-# my $APTGET        = "DEBIAN_FRONTEND=noninteractive; export DEBIAN_FRONTEND ; sudo apt-get $APTGETOPTIONS";
+sub installdeps_debian
+{
+        my $APTGETOPTIONS ='-o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --yes';
+        my $APTGET        = "DEBIAN_FRONTEND=noninteractive; export DEBIAN_FRONTEND ; sudo apt-get $APTGETOPTIONS";
+        my @DEPENDECIES   = (qw(make
+                                patch
+                                makepatch
+                                curl
+                                wget
+                                rsync
+                                gcc
+                                g++
+                                git
+                                perl-modules
+                                libdb-dev
+                                libsqlite3-dev
+                                linux-source-2.6
+                                libgmp3-dev
+                              ));
+        foreach my $dep (@DEPENDECIES) {
+                print_and_execute "$APTGET install $dep\n";
+        }
+}
 
-print "# To install build tools use:"."\n";
-print "  apt-get install make"."\n";
-print "  apt-get install patch"."\n";
-print "  apt-get install makepatch"."\n";
-print "  apt-get install curl"."\n";
-print "  apt-get install wget"."\n";
-print "  apt-get install rsync"."\n";
-print "  apt-get install gcc"."\n";
-print "  apt-get install g++"."\n";
-print "  apt-get install perl-modules"."\n";
-print "  apt-get install libsqlite3-dev"."\n";
-print "  apt-get install linux-source-2.6"."\n";
+if ($installdeps) {
+        my @SUPPORTED_DISTROS = (qw(debian));
+        if (grep { /$installdeps/ } @SUPPORTED_DISTROS) {
+                print "Install dependencies for: $installdeps\n";
+                eval "installdeps_$installdeps()";
+        } else {
+                print "Unsupported dependency installation for distro: $installdeps\n";
+                print "Allowed distros: ".join(", ", @SUPPORTED_DISTROS), "\n";
+                exit 1;
+        }
+                
+}
 
 # ========== prepare ==========
 
