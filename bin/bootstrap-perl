@@ -249,6 +249,35 @@ sub print_and_execute {
         system ($cmd);
 }
 
+sub _perl_base_name {
+        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, $exe_suffixes) = @_;
+        return join("-",
+                    "$perl_revision.$perl_version",
+                    ($usethreads ? "" : "no" )."thread",
+                    ($bit64      ? "" : "no" )."64bit",
+                    @$exe_suffixes,
+                   );
+}
+
+sub _perl_exe_name {
+        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, $exe_suffixes) = @_;
+
+        return join("-",
+                    "perl",
+                    _perl_base_name(@_),
+                   );
+}
+
+sub _perl_pathprefix {
+        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, $exe_suffixes) = @_;
+
+        return join("-",
+                    $prefixbase."/perl",
+                    _perl_base_name(@_),
+                    $gitversion,
+                   );
+}
+
 # ========== getopt ==========
 
 my $ok = GetOptions (
@@ -348,35 +377,6 @@ if ($version =~ /5\.8\./) {
         print_and_execute q'cd $build_path_perl ; git cherry-pick 96a8704c85b1e14bb3d63195b0b720f2fd5b8182';
         # FIX: create missing link (5.8.8)
         print_and_execute q'sudo ln -sf `find  /usr/src -name page.h | grep arch/x86/include/asm/page.h | tail -1` /usr/include/asm/'  if ! -e "/usr/include/asm/page.h";
-}
-
-sub _perl_base_name {
-        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, $exe_suffixes) = @_;
-        return join("-",
-                    "$perl_revision.$perl_version",
-                    ($usethreads ? "" : "no" )."thread",
-                    ($bit64      ? "" : "no" )."64bit",
-                    @$exe_suffixes,
-                   );
-}
-
-sub _perl_exe_name {
-        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, $exe_suffixes) = @_;
-
-        return join("-",
-                    "perl",
-                    _perl_base_name(@_),
-                   );
-}
-
-sub _perl_pathprefix {
-        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, $exe_suffixes) = @_;
-
-        return join("-",
-                    $prefixbase."/perl",
-                    _perl_base_name(@_),
-                    $gitversion,
-                   );
 }
 
 # ========== prepare paths ==========
