@@ -6,9 +6,8 @@ NAME
 The script bootstraps Perl installations inclusive a CPAN environment
 from git.
 
-It was originally developed to be used by
-L<Benchmark::Perl::Formance|Benchmark::Perl::Formance> but now lives
-on its own.
+It was originally developed to be used by Benchmark::Perl::Formance
+but now lives on its own.
 
 It should work for Perl versions from 5.8.x to blead. For 5.8.x it
 cherry-picks a few patches to fix some known build issues.
