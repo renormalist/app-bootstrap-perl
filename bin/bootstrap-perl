@@ -336,9 +336,7 @@ my @EXE_SUFFIXES = sort split /\s+/, $ENV{CODESPEED_EXECUTABLE_SUFFIXES} || "";
 
 print_and_execute "mkdir -p $build_path";
 
-if ( $build_path_perl && -e $build_path_perl ) {
-        print_and_execute "cd $build_path_perl ; git checkout blead ; git pull";
-} else {
+if ( not $build_path_perl && -e $build_path_perl ) {
         if (-e $sourcetgz)
         {
                 print_and_execute "cd $build_path ; tar xzf $sourcetgz";
@@ -347,7 +345,8 @@ if ( $build_path_perl && -e $build_path_perl ) {
         }
 }
 
-chdir "$build_path_perl";
+chdir "$build_path_perl"; # important, I don't remember for what below
+print_and_execute "cd $build_path_perl ; git reset --hard";
 print_and_execute "cd $build_path_perl ; git clean -dxf";
 print_and_execute "cd $build_path_perl ; git checkout blead";
 print_and_execute "cd $build_path_perl ; git pull";
