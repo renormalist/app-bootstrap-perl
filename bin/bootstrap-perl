@@ -356,13 +356,14 @@ print_and_execute "cd $build_path_perl ; git pull";
 # cherry pick several bugfixes in 5.8.8 that break building
 if ($version =~ /5\.8\./) {
         # use temp branch
-        print_and_execute "cd $build_path_perl ; git branch -D bootstrap-perl-local-fixes ; git checkout -b bootstrap-perl-local-fixes";
+	my $localfixes = "bootstrap-perl-local-fixes";
+        print_and_execute "cd $build_path_perl ; git branch -D $localfixes ; git checkout -b $localfixes";
         # FIX: <command-line>
-        print_and_execute q'cd $build_path_perl ; git cherry-pick cf14425e2bd169ce935f76d359f3253b51e441a0';
+        print_and_execute qq!cd $build_path_perl ; git cherry-pick cf14425e2bd169ce935f76d359f3253b51e441a0!;
         # FIX: rebuild / gcc -g
-        print_and_execute q'cd $build_path_perl ; git cherry-pick a3d1be69db4c082c1b9cef14f51a6e7fe4a9dac9';
+        print_and_execute qq!cd $build_path_perl ; git cherry-pick a3d1be69db4c082c1b9cef14f51a6e7fe4a9dac9!;
         # FIX: makedepend.SH
-        print_and_execute q'cd $build_path_perl ; git cherry-pick 96a8704c85b1e14bb3d63195b0b720f2fd5b8182';
+        print_and_execute qq!cd $build_path_perl ; git cherry-pick 96a8704c85b1e14bb3d63195b0b720f2fd5b8182!;
         # FIX: create missing link (5.8.8)
         print_and_execute q'sudo ln -sf `find  /usr/src -name page.h | grep arch/x86/include/asm/page.h | tail -1` /usr/include/asm/'  if ! -e "/usr/include/asm/page.h";
 }
