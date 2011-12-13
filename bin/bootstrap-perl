@@ -488,6 +488,18 @@ if (! -e $CFG) {
         close CPANCFG;
 }
 
+# remove stale cpan lock
+my $cpanlock = "$prefixbase/cpan/.lock";
+if (-e $cpanlock) {
+	my ($pid, $host) = qx!cat $cpanlock!;
+	chomp $pid;
+	my $exists = kill 0, $pid;
+	if (not $exists) {
+		print "Remove stale CPAN.pm lock.\n";
+		print_and_execute qq!rm -f $cpanlock!;
+	}
+}
+
 # force a CPAN.pm with all features we need
 print_and_execute qq{if ! $PERL -M"CPAN 1.98" -e1 ; then echo "force install CPAN" | $PERL -MCPAN -e shell ; fi };
 
