@@ -232,7 +232,7 @@ my @default_mirrors = (qw(
                          http://rub.de/ftp/pub/CPAN/
                         ));
 
-sub print_and_execute {
+sub print_and_system {
         my ($cmd) = @_;
         print $cmd."\n";
         system ($cmd);
@@ -313,7 +313,7 @@ sub installdeps_debian
                                 libgmp3-dev
                               ));
         foreach my $dep (@DEPENDECIES) {
-                print_and_execute "$APTGET install $dep\n";
+                print_and_system "$APTGET install $dep\n";
         }
 }
 
@@ -334,38 +334,38 @@ if ($installdeps) {
 
 my @EXE_SUFFIXES = sort split /\s+/, $ENV{CODESPEED_EXECUTABLE_SUFFIXES} || "";
 
-print_and_execute "mkdir -p $build_path";
+print_and_system "mkdir -p $build_path";
 
 if ( not $build_path_perl && -e $build_path_perl ) {
         if (-e $sourcetgz)
         {
-                print_and_execute "cd $build_path ; tar xzf $sourcetgz";
+                print_and_system "cd $build_path ; tar xzf $sourcetgz";
         } else {
-                print_and_execute "cd $build_path ; git clone $giturl";
+                print_and_system "cd $build_path ; git clone $giturl";
         }
 }
 
 chdir "$build_path_perl"; # important, I don't remember for what below
-print_and_execute "cd $build_path_perl ; git reset --hard";
-print_and_execute "cd $build_path_perl ; git clean -dxf";
-print_and_execute "cd $build_path_perl ; git checkout blead";
-print_and_execute "cd $build_path_perl ; git pull";
-print_and_execute "cd $build_path_perl ; git checkout $version";
-print_and_execute "cd $build_path_perl ; git pull";
+print_and_system "cd $build_path_perl ; git reset --hard";
+print_and_system "cd $build_path_perl ; git clean -dxf";
+print_and_system "cd $build_path_perl ; git checkout blead";
+print_and_system "cd $build_path_perl ; git pull";
+print_and_system "cd $build_path_perl ; git checkout $version";
+print_and_system "cd $build_path_perl ; git pull";
 
 # cherry pick several bugfixes in 5.8.8 that break building
 if ($version =~ /5\.8\./) {
         # use temp branch
 	my $localfixes = "bootstrap-perl-local-fixes";
-        print_and_execute "cd $build_path_perl ; git branch -D $localfixes ; git checkout -b $localfixes";
+        print_and_system "cd $build_path_perl ; git branch -D $localfixes ; git checkout -b $localfixes";
         # FIX: <command-line>
-        print_and_execute qq!cd $build_path_perl ; git cherry-pick cf14425e2bd169ce935f76d359f3253b51e441a0!;
+        print_and_system qq!cd $build_path_perl ; git cherry-pick cf14425e2bd169ce935f76d359f3253b51e441a0!;
         # FIX: rebuild / gcc -g
-        print_and_execute qq!cd $build_path_perl ; git cherry-pick a3d1be69db4c082c1b9cef14f51a6e7fe4a9dac9!;
+        print_and_system qq!cd $build_path_perl ; git cherry-pick a3d1be69db4c082c1b9cef14f51a6e7fe4a9dac9!;
         # FIX: makedepend.SH
-        print_and_execute qq!cd $build_path_perl ; git cherry-pick 96a8704c85b1e14bb3d63195b0b720f2fd5b8182!;
+        print_and_system qq!cd $build_path_perl ; git cherry-pick 96a8704c85b1e14bb3d63195b0b720f2fd5b8182!;
         # FIX: create missing link (5.8.8)
-        print_and_execute q'sudo ln -sf `find  /usr/src -name page.h | grep arch/x86/include/asm/page.h | tail -1` /usr/include/asm/'  if ! -e "/usr/include/asm/page.h";
+        print_and_system q'sudo ln -sf `find  /usr/src -name page.h | grep arch/x86/include/asm/page.h | tail -1` /usr/include/asm/'  if ! -e "/usr/include/asm/page.h";
 }
 
 # ========== prepare paths ==========
@@ -403,12 +403,12 @@ if (! -e $perl_gitversion and ! -e $perl_codespeed)
 {
         # ========== configure ==========
 
-        print_and_execute "sh Configure -de -Dusedevel $USETHREADS $BIT64 -Dprefix=$PREFIX";
+        print_and_system "sh Configure -de -Dusedevel $USETHREADS $BIT64 -Dprefix=$PREFIX";
 
 
         # ========== make ==========
 
-        print_and_execute "make $THREADS";
+        print_and_system "make $THREADS";
 
         if ($test)
         {
@@ -417,13 +417,13 @@ if (! -e $perl_gitversion and ! -e $perl_codespeed)
 
                 my $TEST = $api_version >= 11 ? "test_harness" : "test"; # only Perl 5.11+
                 my $TEST_JOBS = $jobs ? "TEST_JOBS=$jobs" : "TEST_JOBS=$threadcount";
-                print_and_execute "$TEST_JOBS make $TEST";
+                print_and_system "$TEST_JOBS make $TEST";
         }
 
 
         # ========== install ==========
 
-        print_and_execute "make $DRY install";
+        print_and_system "make $DRY install";
 
 }
 
@@ -433,7 +433,7 @@ if (! -e $perl_gitversion and ! -e $perl_codespeed)
 if (open my $PERLGITVERSION, ">", $perl_gitversion)
 {
         print $PERLGITVERSION sprintf(qq{#! /usr/bin/env perl\n\nprint '%s'."\n";}, $gitversion);
-        print_and_execute "chmod ugo+x $perl_gitversion";
+        print_and_system "chmod ugo+x $perl_gitversion";
         close $PERLGITVERSION;
 }
 
@@ -441,7 +441,7 @@ if (open my $PERLGITVERSION, ">", $perl_gitversion)
 if (open my $PERLCODESPEED, ">", $perl_codespeed)
 {
         print $PERLCODESPEED sprintf(qq{#! /usr/bin/env perl\n\nprint '%s'."\n";}, $codespeed_executable);
-        print_and_execute "chmod ugo+x $perl_codespeed";
+        print_and_system "chmod ugo+x $perl_codespeed";
         close $PERLCODESPEED;
 }
 
@@ -457,23 +457,23 @@ my $POD2TEXT = `ls -drt1 $PREFIX/bin/pod2text5.*.* | tail -1`; chomp $POD2TEXT;
 # print "# POD2TEXT: $POD2TEXT\n";
 
 # some dists don't find the versioned developer files
-print_and_execute "ln -sf $PERL     $PREFIX/bin/perl";
-print_and_execute "ln -sf $CPAN     $PREFIX/bin/cpan";
-print_and_execute "ln -sf $PERLDOC  $PREFIX/bin/perldoc";
-print_and_execute "ln -sf $POD2TEXT $PREFIX/bin/pod2text";
+print_and_system "ln -sf $PERL     $PREFIX/bin/perl";
+print_and_system "ln -sf $CPAN     $PREFIX/bin/cpan";
+print_and_system "ln -sf $PERLDOC  $PREFIX/bin/perldoc";
+print_and_system "ln -sf $POD2TEXT $PREFIX/bin/pod2text";
 
 # ========== cpan ==========
 
 # distroprefs: get all from git
-print_and_execute "mkdir -p $DISTROPREFSSRCBASE";
-print_and_execute "cd $DISTROPREFSSRCBASE ; git clone $DISTROPREFSREPO";
-print_and_execute "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs ; git pull";
-print_and_execute "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs ; git submodule update --init --recursive";
-print_and_execute "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs ; git pull";
+print_and_system "mkdir -p $DISTROPREFSSRCBASE";
+print_and_system "cd $DISTROPREFSSRCBASE ; git clone $DISTROPREFSREPO";
+print_and_system "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs ; git pull";
+print_and_system "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs ; git submodule update --init --recursive";
+print_and_system "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs ; git pull";
 # distroprefs: merge our flavour
-print_and_execute qq!mkdir -p $DISTROPREFSDIR!;
-print_and_execute qq!rsync -r $DISTROPREFSSRC1/ $DISTROPREFSDIR/!;
-print_and_execute qq!rsync -r $DISTROPREFSSRC2/ $DISTROPREFSDIR/!;
+print_and_system qq!mkdir -p $DISTROPREFSDIR!;
+print_and_system qq!rsync -r $DISTROPREFSSRC1/ $DISTROPREFSDIR/!;
+print_and_system qq!rsync -r $DISTROPREFSSRC2/ $DISTROPREFSDIR/!;
 
 # Configure CPAN initially
 my $CFG = `$PERLDOC -l CPAN | sed -e "s/CPAN\.pm/CPAN\\/Config.pm/"`; chomp $CFG;
@@ -496,39 +496,39 @@ if (-e $cpanlock) {
 	my $exists = kill 0, $pid;
 	if (not $exists) {
 		print "Remove stale CPAN.pm lock.\n";
-		print_and_execute qq!rm -f $cpanlock!;
+		print_and_system qq!rm -f $cpanlock!;
 	}
 }
 
 # force a CPAN.pm with all features we need
-print_and_execute qq{if ! $PERL -M"CPAN 1.98" -e1 ; then echo "force install CPAN" | $PERL -MCPAN -e shell ; fi };
+print_and_system qq{if ! $PERL -M"CPAN 1.98" -e1 ; then echo "force install CPAN" | $PERL -MCPAN -e shell ; fi };
 
 # configure
-print_and_execute qq!echo "o conf auto_commit 1 ; o conf commit"                     | $PERL -MCPAN -e shell!;
+print_and_system qq!echo "o conf auto_commit 1 ; o conf commit"                     | $PERL -MCPAN -e shell!;
 
 # once upon a time the cpan exe missed the executable bit - set it to be sure
-print_and_execute qq!chmod +x $CPAN!;
+print_and_system qq!chmod +x $CPAN!;
 
 # install extended cpan toolchain
-print_and_execute qq! echo "install YAML"                      | $PERL -MCPAN -e shell!;
-print_and_execute qq{if ! $PERL -MYAML -e1 ; then echo "force install YAML" | $PERL -MCPAN -e shell ; fi };
-print_and_execute qq! echo "install CPAN::SQLite"              | $PERL -MCPAN -e shell!;
-print_and_execute qq! echo "install YAML::Syck"                | $PERL -MCPAN -e shell!;
-print_and_execute qq! echo "install IO::Tty"                   | $PERL -MCPAN -e shell!;
-print_and_execute qq! echo "install Expect"                    | $PERL -MCPAN -e shell!;
-print_and_execute qq! echo "install Bundle::CPAN"              | $PERL -MCPAN -e shell!;
-print_and_execute qq! echo "install LWP"                       | $PERL -MCPAN -e shell!;
+print_and_system qq! echo "install YAML"                      | $PERL -MCPAN -e shell!;
+print_and_system qq{if ! $PERL -MYAML -e1 ; then echo "force install YAML" | $PERL -MCPAN -e shell ; fi };
+print_and_system qq! echo "install CPAN::SQLite"              | $PERL -MCPAN -e shell!;
+print_and_system qq! echo "install YAML::Syck"                | $PERL -MCPAN -e shell!;
+print_and_system qq! echo "install IO::Tty"                   | $PERL -MCPAN -e shell!;
+print_and_system qq! echo "install Expect"                    | $PERL -MCPAN -e shell!;
+print_and_system qq! echo "install Bundle::CPAN"              | $PERL -MCPAN -e shell!;
+print_and_system qq! echo "install LWP"                       | $PERL -MCPAN -e shell!;
 
 # install modules from CPAN
 foreach my $module (@MODULES) {
-        print_and_execute qq!$CPAN $module!;
+        print_and_system qq!$CPAN $module!;
 }
 
 # Run scripts from inside the just installed Perl
 foreach my $runscript (@RUNSCRIPTS) {
-        print_and_execute qq!$PREFIX/bin/$runscript!;
+        print_and_system qq!$PREFIX/bin/$runscript!;
 }
-# print_and_execute qq!$PREFIX/bin/tapper-testsuite-benchmark-perlformance!;
+# print_and_system qq!$PREFIX/bin/tapper-testsuite-benchmark-perlformance!;
 
 __DATA__
 
