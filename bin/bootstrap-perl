@@ -275,6 +275,11 @@ sub _perl_pathprefix {
 
 # ========== getopt ==========
 
+print "\n";
+print "============================================================\n";
+print "Bootstrap Perl\n";
+print "============================================================\n";
+
 my $ok = GetOptions (
                      "prefix=s"     => \$prefix,
                      "prefixbase=s" => \$prefixbase,
@@ -380,6 +385,17 @@ my $gitversion           = print_and_qx qq!cd $build_path_perl ; git describe!; 
 my ($perl_revision, $perl_version, $perl_subversion) = $gitversion =~ m/^\D*(\d+)[._](\d+)(?:[._](\d+))?.*$/g;
 $perl_subversion ||= 0;
 
+print "\n";
+print "============================================================\n\n";
+print "  Bootstrap Perl\n";
+print "  --------------\n\n";
+print "  version:        $version\n\n";
+print "  git-describe:   $gitversion\n\n";
+print "  CPAN mirrors:   ".join("\n                  ", @CPANMIRRORS)."\n\n";
+print "  modules:        ".join("\n                  ", @MODULES)."\n\n";
+print "  scripts:        ".join("\n                  ", @RUNSCRIPTS)."\n\n";
+print "============================================================\n\n";
+
 unless (defined $perl_revision && defined $perl_version)
 {
         no warnings 'uninitialized';
@@ -457,10 +473,10 @@ my $PERL     = print_and_qx qq!ls -drt1 $PREFIX/bin/perl5.*.*     | tail -1!; ch
 my $PERLDOC  = print_and_qx qq!ls -drt1 $PREFIX/bin/perldoc5.*.*  | tail -1!; chomp $PERLDOC;
 my $POD2TEXT = print_and_qx qq!ls -drt1 $PREFIX/bin/pod2text5.*.* | tail -1!; chomp $POD2TEXT;
 
-# print "# CPAN:     $CPAN\n";
-# print "# PERL:     $PERL\n";
-# print "# PERLDOC:  $PERLDOC\n";
-# print "# POD2TEXT: $POD2TEXT\n";
+print "# CPAN:     $CPAN\n";
+print "# PERL:     $PERL\n";
+print "# PERLDOC:  $PERLDOC\n";
+print "# POD2TEXT: $POD2TEXT\n";
 
 # some dists don't find the versioned developer files
 print_and_system "ln -sf $PERL     $PREFIX/bin/perl";
