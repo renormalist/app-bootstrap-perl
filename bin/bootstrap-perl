@@ -238,6 +238,12 @@ sub print_and_system {
         system ($cmd);
 }
 
+sub print_and_qx {
+        my ($cmd) = @_;
+        print $cmd."\n";
+        qx($cmd);
+}
+
 sub _perl_base_name {
         my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, $exe_suffixes) = @_;
         return join("-",
@@ -370,7 +376,7 @@ if ($version =~ /5\.8\./) {
 
 # ========== prepare paths ==========
 
-my $gitversion           = `cd $build_path_perl ; git describe`; chomp $gitversion;
+my $gitversion           = print_and_qx qq!cd $build_path_perl ; git describe!; chomp $gitversion;
 my ($perl_revision, $perl_version, $perl_subversion) = $gitversion =~ m/^\D*(\d+)[._](\d+)(?:[._](\d+))?.*$/g;
 $perl_subversion ||= 0;
 
@@ -446,10 +452,10 @@ if (open my $PERLCODESPEED, ">", $perl_codespeed)
 }
 
 # binaries
-my $CPAN     = `ls -drt1 $PREFIX/bin/cpan5.*.*     | tail -1`; chomp $CPAN;
-my $PERL     = `ls -drt1 $PREFIX/bin/perl5.*.*     | tail -1`; chomp $PERL;
-my $PERLDOC  = `ls -drt1 $PREFIX/bin/perldoc5.*.*  | tail -1`; chomp $PERLDOC;
-my $POD2TEXT = `ls -drt1 $PREFIX/bin/pod2text5.*.* | tail -1`; chomp $POD2TEXT;
+my $CPAN     = print_and_qx qq!ls -drt1 $PREFIX/bin/cpan5.*.*     | tail -1!; chomp $CPAN;
+my $PERL     = print_and_qx qq!ls -drt1 $PREFIX/bin/perl5.*.*     | tail -1!; chomp $PERL;
+my $PERLDOC  = print_and_qx qq!ls -drt1 $PREFIX/bin/perldoc5.*.*  | tail -1!; chomp $PERLDOC;
+my $POD2TEXT = print_and_qx qq!ls -drt1 $PREFIX/bin/pod2text5.*.* | tail -1!; chomp $POD2TEXT;
 
 # print "# CPAN:     $CPAN\n";
 # print "# PERL:     $PERL\n";
@@ -476,7 +482,7 @@ print_and_system qq!rsync -r $DISTROPREFSSRC1/ $DISTROPREFSDIR/!;
 print_and_system qq!rsync -r $DISTROPREFSSRC2/ $DISTROPREFSDIR/!;
 
 # Configure CPAN initially
-my $CFG = `$PERLDOC -l CPAN | sed -e "s/CPAN\.pm/CPAN\\/Config.pm/"`; chomp $CFG;
+my $CFG = print_and_qx qq!$PERLDOC -l CPAN | sed -e "s/CPAN\.pm/CPAN\\/Config.pm/"!; chomp $CFG;
 
 if (! -e $CFG) {
         my $CPANCFG = do { local $/; <DATA> };
