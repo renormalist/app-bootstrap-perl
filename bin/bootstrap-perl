@@ -318,6 +318,8 @@ sub installdeps_debian
                                 g++
                                 git
                                 perl-modules
+                                libbz2-1.0
+                                libbz2-dev
                                 libdb-dev
                                 libsqlite3-dev
                                 linux-source-2.6
