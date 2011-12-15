@@ -368,7 +368,7 @@ print_and_system "cd $build_path_perl ; git checkout $version";
 print_and_system "cd $build_path_perl ; git pull";
 
 # cherry pick several bugfixes in 5.8.8 that break building
-if ($version =~ /5\.8\./) {
+if ($version =~ /5\.8\./ or $version =~ /5\.9\.0/) {
         # use temp branch
 	my $localfixes = "bootstrap-perl-local-fixes";
         print_and_system "cd $build_path_perl ; git branch -D $localfixes ; git checkout -b $localfixes";
@@ -534,9 +534,14 @@ print_and_system qq!echo "o conf auto_commit 1 ; o conf commit"                 
 # once upon a time the cpan exe missed the executable bit - set it to be sure
 print_and_system qq!chmod +x $CPAN!;
 
-# install extended cpan toolchain
+# install extended cpan toolchain; contains some "force" where we know they are really required
 print_and_system qq! echo "install YAML"                      | $PERL -MCPAN -e shell!;
-print_and_system qq{if ! $PERL -MYAML -e1 ; then echo "force install YAML" | $PERL -MCPAN -e shell ; fi };
+print_and_system qq{if ! $PERL -MYAML -e1 ;         then echo "force install YAML"         | $PERL -MCPAN -e shell ; fi };
+print_and_system qq{if ! $PERL -MIO::Compress::Base -e1 ; then echo "force install IO::Compress::Base" | $PERL -MCPAN -e shell ; fi };
+if ($gitversion =~ /perl-5\.8\.0/) {
+	print_and_system qq! echo "force install Module::Build" | $PERL -MCPAN -e shell!;
+}
+print_and_system qq! echo "force install version"             | $PERL -MCPAN -e shell!;
 print_and_system qq! echo "install CPAN::SQLite"              | $PERL -MCPAN -e shell!;
 print_and_system qq! echo "install YAML::Syck"                | $PERL -MCPAN -e shell!;
 print_and_system qq! echo "install IO::Tty"                   | $PERL -MCPAN -e shell!;
