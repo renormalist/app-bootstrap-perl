@@ -359,6 +359,7 @@ if ( not $build_path_perl && -e $build_path_perl ) {
 }
 
 chdir "$build_path_perl"; # important, I don't remember for what below
+print_and_system "cd $build_path_perl ; rm -f $build_path_perl/.git/index.lock";
 print_and_system "cd $build_path_perl ; git reset --hard";
 print_and_system "cd $build_path_perl ; git clean -dxf";
 print_and_system "cd $build_path_perl ; git checkout blead";
