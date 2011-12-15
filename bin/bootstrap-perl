@@ -428,27 +428,27 @@ if (! -e $perl_gitversion and ! -e $perl_codespeed)
 {
         # ========== configure ==========
 
-        print_and_system "sh Configure -de -Dusedevel $USETHREADS $BIT64 -Dprefix=$PREFIX";
+        print_and_system "cd $build_path_perl; sh Configure -de -Dusedevel $USETHREADS $BIT64 -Dprefix=$PREFIX";
 
 
         # ========== make ==========
 
-        print_and_system "make $THREADS";
+        print_and_system "cd $build_path_perl; make $THREADS";
 
         if ($test)
         {
-                my $api_version = `. ./config.sh ; echo \$api_version`;
+                my $api_version = `cd $build_path_perl; . ./config.sh ; echo \$api_version`;
                 chomp $api_version;
 
                 my $TEST = $api_version >= 11 ? "test_harness" : "test"; # only Perl 5.11+
                 my $TEST_JOBS = $jobs ? "TEST_JOBS=$jobs" : "TEST_JOBS=$threadcount";
-                print_and_system "$TEST_JOBS make $TEST";
+                print_and_system "cd $build_path_perl; $TEST_JOBS make $TEST";
         }
 
 
         # ========== install ==========
 
-        print_and_system "make $DRY install";
+        print_and_system "cd $build_path_perl; make $DRY install";
 
 }
 
