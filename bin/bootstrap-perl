@@ -1,4 +1,4 @@
-#! /usr/bin/env perl
+#! /usr/bin/perl
 
 =head1 NAME
 
@@ -122,6 +122,7 @@ Install these modules from CPAN:
 Run these scripts relative to built <PREFIX>/bin/:
 
   $ bootstrap-perl --run tapper-testsuite-benchmark-perlformance
+  $ bootstrap-perl --run tapper-testsuite-benchmark-perlformance --runargs="--plugins=ALL"
   $ bootstrap-perl -r tapper-testsuite-benchmark-perlformance -r primes.pl
 
 (Option can be repeated and allow comma separated lists.)
@@ -216,6 +217,7 @@ my $jobs                = $threadcount;
 my @mirrors;
 my @modules;
 my @runscripts;
+my @runargs             = ();
 
 my $DISTROPREFSREPO     = "git://github.com/renormalist/cpanpm-distroprefs.git";
 my $DISTROPREFSSRCBASE  = "$build_path";
@@ -295,6 +297,7 @@ my $ok = GetOptions (
                      'mirror|m=s@'  => \@mirrors,
                      'module|M=s@'  => \@modules,
                      'run|r=s@'     => \@runscripts,
+                     'runargs=s@'  => \@runargs,
                     );
 
 # modules/mirros can be comma-separated
@@ -396,7 +399,7 @@ print "  version:        $version\n\n";
 print "  git-describe:   $gitversion\n\n";
 print "  CPAN mirrors:   ".join("\n                  ", @CPANMIRRORS)."\n\n";
 print "  modules:        ".join("\n                  ", @MODULES)."\n\n";
-print "  scripts:        ".join("\n                  ", @RUNSCRIPTS)."\n\n";
+print "  scripts:        ".join("\n                  ", map { $_ ." ".join(" ", @runargs) } @RUNSCRIPTS)."\n\n";
 print "============================================================\n\n";
 
 unless (defined $perl_revision && defined $perl_version)
@@ -539,7 +542,12 @@ print_and_system qq! echo "install YAML"                      | $PERL -MCPAN -e 
 print_and_system qq{if ! $PERL -MYAML -e1 ;         then echo "force install YAML"         | $PERL -MCPAN -e shell ; fi };
 print_and_system qq{if ! $PERL -MIO::Compress::Base -e1 ; then echo "force install IO::Compress::Base" | $PERL -MCPAN -e shell ; fi };
 if ($gitversion =~ /perl-5\.8\.0/) {
+        # ignore known failing tests
 	print_and_system qq! echo "force install Module::Build" | $PERL -MCPAN -e shell!;
+}
+if ($gitversion =~ /perl-5\.15\./) {
+        # ignore known failing tests
+	print_and_system qq! echo "force install Devel::Size" | $PERL -MCPAN -e shell!;
 }
 print_and_system qq! echo "force install version"             | $PERL -MCPAN -e shell!;
 print_and_system qq! echo "install CPAN::SQLite"              | $PERL -MCPAN -e shell!;
@@ -556,7 +564,7 @@ foreach my $module (@MODULES) {
 
 # Run scripts from inside the just installed Perl
 foreach my $runscript (@RUNSCRIPTS) {
-        print_and_system qq!$PREFIX/bin/$runscript!;
+        print_and_system qq!$PREFIX/bin/$runscript !.join(" ", @runargs);
 }
 # print_and_system qq!$PREFIX/bin/tapper-testsuite-benchmark-perlformance!;
 
