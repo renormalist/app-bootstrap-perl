@@ -331,7 +331,7 @@ sub installdeps_debian
                                 libbz2-dev
                                 libdb-dev
                                 libsqlite3-dev
-                                linux-source-2.6
+                                linux-source
                                 libgmp3-dev
                               ));
         foreach my $dep (@DEPENDECIES) {
