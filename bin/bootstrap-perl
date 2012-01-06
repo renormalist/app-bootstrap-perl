@@ -333,6 +333,7 @@ sub installdeps_debian
                                 libsqlite3-dev
                                 linux-source
                                 libgmp3-dev
+                                libssl-dev
                               ));
         foreach my $dep (@DEPENDECIES) {
                 print_and_system "$APTGET install $dep\n";
