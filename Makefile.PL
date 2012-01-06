@@ -2,6 +2,7 @@ use inc::Module::Install;
 
 license  'perl';
 
+name     'App-Bootstrap-Perl';
 all_from 'lib/App/Bootstrap/Perl.pm';
 
 repository     'git://github.com/renormalist/app-bootstrap-perl.git';

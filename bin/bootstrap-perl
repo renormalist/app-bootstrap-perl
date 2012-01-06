@@ -4,6 +4,19 @@
 
 bootstrap-perl - Bootstrap Perl inclusive CPAN from git
 
+=head1 ABOUT
+
+The script B<bootstrap-perl> bootstraps Perl installations with
+complete CPAN environment, inclusive distroprefs, from git.
+
+It was originally developed to be used by
+L<Benchmark::Perl::Formance|Benchmark::Perl::Formance> and now lives
+on its own.
+
+It should work for Perl versions from 5.8.6 to blead. Occasionally it
+cherry-picks a very few patches to fix some known build issues, like
+for 5.8.x.
+
 =head1 SYNOPSIS
 
 Install a threaded 64bit Perl using current "blead"
@@ -126,19 +139,6 @@ Run these scripts relative to built <PREFIX>/bin/:
   $ bootstrap-perl -r tapper-testsuite-benchmark-perlformance -r primes.pl
 
 (Option can be repeated and allow comma separated lists.)
-
-=head1 ABOUT
-
-The script bootstraps Perl installations inclusive a CPAN environment
-from git.
-
-It was originally developed to be used by
-L<Benchmark::Perl::Formance|Benchmark::Perl::Formance> but now lives
-on its own.
-
-It should work for Perl versions from 5.8.x to blead. For 5.8.x it
-cherry-picks a few patches to fix some known build issues but newer
-versions after 5.8.x are not patched.
 
 =head2 Unified installation prefix schema
 
@@ -297,7 +297,8 @@ my $ok = GetOptions (
                      'mirror|m=s@'  => \@mirrors,
                      'module|M=s@'  => \@modules,
                      'run|r=s@'     => \@runscripts,
-                     'runargs=s@'  => \@runargs,
+                     'runargs=s@'   => \@runargs,
+                     'giturl=s'     => \$giturl,
                     );
 
 # modules/mirros can be comma-separated
