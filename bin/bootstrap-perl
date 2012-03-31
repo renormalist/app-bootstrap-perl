@@ -156,10 +156,11 @@ and I<git-describe>.
 
 =head2 Meta info utilities
 
-To easily provide the raw I<git-describe> a script is put inside each
-install
+To easily provide the raw I<git-describe> two scripts are is put inside
+each install
 
-  perl-gitversion
+  perl-gitdescribe
+  perl-gitchangeset
 
 which prints the I<git-describe> of that installation.
 
@@ -383,23 +384,20 @@ print_and_system "cd $build_path_perl ; git pull";
 
 # cherry pick several bugfixes in 5.8.8 that break building
 if ($version =~ /5\.8\./ or $version =~ /5\.9\.0/) {
-        # use temp branch
-	my $localfixes = "bootstrap-perl-local-fixes";
-        print_and_system "cd $build_path_perl ; git branch -D $localfixes ; git checkout -b $localfixes";
         # FIX: <command-line>
-        print_and_system qq!cd $build_path_perl ; git cherry-pick cf14425e2bd169ce935f76d359f3253b51e441a0!;
+        print_and_system qq!cd $build_path_perl ; git cherry-pick -n cf14425e2bd169ce935f76d359f3253b51e441a0!;
         # FIX: rebuild / gcc -g
-        print_and_system qq!cd $build_path_perl ; git cherry-pick a3d1be69db4c082c1b9cef14f51a6e7fe4a9dac9!;
+        print_and_system qq!cd $build_path_perl ; git cherry-pick -n a3d1be69db4c082c1b9cef14f51a6e7fe4a9dac9!;
         # FIX: makedepend.SH
-        print_and_system qq!cd $build_path_perl ; git cherry-pick 96a8704c85b1e14bb3d63195b0b720f2fd5b8182!;
+        print_and_system qq!cd $build_path_perl ; git cherry-pick -n 96a8704c85b1e14bb3d63195b0b720f2fd5b8182!;
         # FIX: create missing link (5.8.8)
         print_and_system q'sudo ln -sf `find  /usr/src -name page.h | grep arch/x86/include/asm/page.h | tail -1` /usr/include/asm/'  if ! -e "/usr/include/asm/page.h";
 }
 
 # ========== prepare paths ==========
 
-my $gitdescribe           = print_and_qx qq!cd $build_path_perl ; git describe!;       chomp $gitdescribe;
-my $gitversion            = print_and_qx qq!cd $build_path_perl ; git rev-parse HEAD!; chomp $gitversion;
+my $gitdescribe           = print_and_qx qq!cd $build_path_perl ; git describe --all!; chomp $gitdescribe; $gitdescribe =~ s|^tags/||g;
+my $gitchangeset          = print_and_qx qq!cd $build_path_perl ; git rev-parse HEAD!; chomp $gitchangeset;
 my ($perl_revision, $perl_version, $perl_subversion) = $gitdescribe =~ m/^\D*(\d+)[._](\d+)(?:[._](\d+))?.*$/g;
 $perl_version             = sprintf("%02d", $perl_version);
 $perl_subversion ||= 0;
@@ -410,6 +408,7 @@ print "  Bootstrap Perl\n";
 print "  --------------\n\n";
 print "  version:        $version\n\n";
 print "  git-describe:   $gitdescribe\n\n";
+print "  git-changeset:  $gitchangeset\n\n";
 print "  configureargs:  ".join("\n                  ", @confargs)."\n\n";
 print "  CPAN mirrors:   ".join("\n                  ", @CPANMIRRORS)."\n\n";
 print "  modules:        ".join("\n                  ", @MODULES)."\n\n";
@@ -433,7 +432,8 @@ $ENV{PERL_AUTOINSTALL} = "--defaultdeps";
 $ENV{TEST_JOBS}        = $threadcount;
 $ENV{TWMC_TEST_PORT}   = "9876";
 
-my $perl_gitversion = "$PREFIX/bin/perl-gitversion";
+my $perl_gitdescribe = "$PREFIX/bin/perl-gitdescribe";
+my $perl_gitchangeset = "$PREFIX/bin/perl-gitchangeset";
 my $perl_codespeed = "$PREFIX/bin/perl-codespeed-executable";
 
 my $THREADS = $jobs ? "-j $jobs" : "-j $threadcount";
@@ -441,7 +441,7 @@ my $DRY = $dry ? "-n" : "";
 
 # ========== build ==========
 
-if (! -e $perl_gitversion and ! -e $perl_codespeed)
+if (! -e $perl_gitchangeset and ! -e $perl_codespeed)
 {
         # ========== configure ==========
 
@@ -466,17 +466,25 @@ if (! -e $perl_gitversion and ! -e $perl_codespeed)
         # ========== install ==========
 
         print_and_system "cd $build_path_perl; make $DRY install";
-
+} else {
+        print "*** SKIP building perl - already existing.\n";
 }
 
 # ========== perlformance utils ==========
 
 # create a binary that prints git version
-if (open my $PERLGITVERSION, ">", $perl_gitversion)
+if (open my $PERLGITDESCRIBE, ">", $perl_gitdescribe)
 {
-        print $PERLGITVERSION sprintf(qq{#! /usr/bin/env perl\n\nprint '%s'."\n";}, $gitdescribe);
-        print_and_system "chmod ugo+x $perl_gitversion";
-        close $PERLGITVERSION;
+        print $PERLGITDESCRIBE sprintf(qq{#! /usr/bin/env perl\n\nprint '%s'."\n";}, $gitdescribe);
+        print_and_system "chmod ugo+x $perl_gitdescribe";
+        close $PERLGITDESCRIBE;
+}
+
+if (open my $PERLGITCHANGESET, ">", $perl_gitchangeset)
+{
+        print $PERLGITCHANGESET sprintf(qq{#! /usr/bin/env perl\n\nprint '%s'."\n";}, $gitchangeset);
+        print_and_system "chmod ugo+x $perl_gitchangeset";
+        close $PERLGITCHANGESET;
 }
 
 # create a binary that prints sensible executable name for codespeed
