@@ -315,7 +315,7 @@ my @MODULES     = map { chomp; $_ } map { split(qr/,/, $_) } (@modules ? @module
 my @CPANMIRRORS = map { chomp; $_ } map { split(qr/,/, $_) } (@mirrors ? @mirrors : @default_mirrors);
 my @RUNSCRIPTS  = map { chomp; $_ } map { split(qr/,/, $_) } @runscripts;
 my @EXESUFFIXES = sort map { chomp; $_ } map { split(qr/,/, $_) } @exesuffixes;
-my @CONFARGS    = join " ", map { chomp; $_ } @confargs; # repeatable, but no comma-separate
+my $CONFARGS    = join " ", map { chomp; $_ } @confargs; # repeatable, but no comma-separate
 
 # ========== build dependencies ==========
 
