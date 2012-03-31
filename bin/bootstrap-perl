@@ -401,6 +401,7 @@ if ($version =~ /5\.8\./ or $version =~ /5\.9\.0/) {
 my $gitdescribe           = print_and_qx qq!cd $build_path_perl ; git describe!;       chomp $gitdescribe;
 my $gitversion            = print_and_qx qq!cd $build_path_perl ; git rev-parse HEAD!; chomp $gitversion;
 my ($perl_revision, $perl_version, $perl_subversion) = $gitdescribe =~ m/^\D*(\d+)[._](\d+)(?:[._](\d+))?.*$/g;
+$perl_version             = sprintf("%02d", $perl_version);
 $perl_subversion ||= 0;
 
 print "\n";
