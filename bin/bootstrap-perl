@@ -144,12 +144,12 @@ Run these scripts relative to built <PREFIX>/bin/:
 
 It uses a unified naming schema for it's installation PREFIX:
 
-  /opt/perl-5.<VERSION>-<(no)?thread>-<(no)?64bit>-<git-describe>
+  /opt/perl-5.<VERSION>-<(y|n)T>-<(y|n)?64>-<git-describe>
 
 which leads to paths like this:
 
-  /opt/perl-5.10-thread-64bit-v5.10.0
-  /opt/perl-5.15-thread-64bit-v5.15.5-258-ge7d0a3f
+  /opt/perl-5.10-yT-y64-v5.10.0
+  /opt/perl-5.15-yT-y64-v5.15.5-258-ge7d0a3f
 
 This naming schema consist of the major version, basic configuration
 and I<git-describe>.
@@ -252,8 +252,8 @@ sub _perl_base_name {
         my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, $exe_suffixes) = @_;
         return join("-",
                     "$perl_revision.$perl_version",
-                    ($usethreads ? "" : "no" )."thread",
-                    ($bit64      ? "" : "no" )."64bit",
+                    ($usethreads ? "y" : "n" )."T",
+                    ($bit64      ? "y" : "n" )."64",
                     @$exe_suffixes,
                    );
 }
