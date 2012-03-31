@@ -398,8 +398,9 @@ if ($version =~ /5\.8\./ or $version =~ /5\.9\.0/) {
 
 # ========== prepare paths ==========
 
-my $gitversion           = print_and_qx qq!cd $build_path_perl ; git describe!; chomp $gitversion;
-my ($perl_revision, $perl_version, $perl_subversion) = $gitversion =~ m/^\D*(\d+)[._](\d+)(?:[._](\d+))?.*$/g;
+my $gitdescribe           = print_and_qx qq!cd $build_path_perl ; git describe!;       chomp $gitdescribe;
+my $gitversion            = print_and_qx qq!cd $build_path_perl ; git rev-parse HEAD!; chomp $gitversion;
+my ($perl_revision, $perl_version, $perl_subversion) = $gitdescribe =~ m/^\D*(\d+)[._](\d+)(?:[._](\d+))?.*$/g;
 $perl_subversion ||= 0;
 
 print "\n";
@@ -407,7 +408,7 @@ print "============================================================\n\n";
 print "  Bootstrap Perl\n";
 print "  --------------\n\n";
 print "  version:        $version\n\n";
-print "  git-describe:   $gitversion\n\n";
+print "  git-describe:   $gitdescribe\n\n";
 print "  configureargs:  ".join("\n                  ", @confargs)."\n\n";
 print "  CPAN mirrors:   ".join("\n                  ", @CPANMIRRORS)."\n\n";
 print "  modules:        ".join("\n                  ", @MODULES)."\n\n";
@@ -417,13 +418,13 @@ print "============================================================\n\n";
 unless (defined $perl_revision && defined $perl_version)
 {
         no warnings 'uninitialized';
-        print "# Bummer! Unrecognized version schema ($gitversion).\n";
+        print "# Bummer! Unrecognized version schema ($gitdescribe).\n";
         print "# ($perl_revision, $perl_version, $perl_subversion)\n";
         exit 1;
 }
 
-my $codespeed_executable =            _perl_exe_name  ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, \@EXESUFFIXES);
-my $PREFIX               = $prefix || _perl_pathprefix($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, \@EXESUFFIXES);
+my $codespeed_executable =            _perl_exe_name  ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitdescribe, \@EXESUFFIXES);
+my $PREFIX               = $prefix || _perl_pathprefix($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitdescribe, \@EXESUFFIXES);
 my $USETHREADS           = $usethreads ? "-Dusethreads"  : "";
 my $BIT64                = $bit64      ? "-Duse64bitall" : "";
 
@@ -472,7 +473,7 @@ if (! -e $perl_gitversion and ! -e $perl_codespeed)
 # create a binary that prints git version
 if (open my $PERLGITVERSION, ">", $perl_gitversion)
 {
-        print $PERLGITVERSION sprintf(qq{#! /usr/bin/env perl\n\nprint '%s'."\n";}, $gitversion);
+        print $PERLGITVERSION sprintf(qq{#! /usr/bin/env perl\n\nprint '%s'."\n";}, $gitdescribe);
         print_and_system "chmod ugo+x $perl_gitversion";
         close $PERLGITVERSION;
 }
@@ -553,11 +554,11 @@ print_and_system qq!chmod +x $CPAN!;
 print_and_system qq! echo "install YAML"                      | $PERL -MCPAN -e shell!;
 print_and_system qq{if ! $PERL -MYAML -e1 ;         then echo "force install YAML"         | $PERL -MCPAN -e shell ; fi };
 print_and_system qq{if ! $PERL -MIO::Compress::Base -e1 ; then echo "force install IO::Compress::Base" | $PERL -MCPAN -e shell ; fi };
-if ($gitversion =~ /perl-5\.8\.0/) {
+if ($gitdescribe =~ /perl-5\.8\.0/) {
         # ignore known failing tests
 	print_and_system qq! echo "force install Module::Build" | $PERL -MCPAN -e shell!;
 }
-if ($gitversion =~ /perl-5\.15\./) {
+if ($gitdescribe =~ /perl-5\.15\./) {
         # ignore known failing tests
 	print_and_system qq! echo "force install Devel::Size" | $PERL -MCPAN -e shell!;
 }
