@@ -216,8 +216,10 @@ my $test                = 0;
 my $jobs                = $threadcount;
 my @mirrors;
 my @modules;
-my @runscripts;
+my @runscripts          = ();
 my @runargs             = ();
+my @confargs            = ();
+my @exesuffixes         = ();
 
 my $DISTROPREFSREPO     = "git://github.com/renormalist/cpanpm-distroprefs.git";
 my $DISTROPREFSSRCBASE  = "$build_path";
@@ -298,6 +300,8 @@ my $ok = GetOptions (
                      'module|M=s@'  => \@modules,
                      'run|r=s@'     => \@runscripts,
                      'runargs=s@'   => \@runargs,
+                     'confargs=s@'  => \@confargs,
+                     'exesuffixes=s@' => \@exesuffixes,
                      'giturl=s'     => \$giturl,
                     );
 
@@ -306,10 +310,12 @@ if ($help) {
         exit 0;
 }
 
-# modules/mirros can be comma-separated
+# modules/mirros/runscripts can be comma-separated
 my @MODULES     = map { chomp; $_ } map { split(qr/,/, $_) } (@modules ? @modules : @default_modules);
 my @CPANMIRRORS = map { chomp; $_ } map { split(qr/,/, $_) } (@mirrors ? @mirrors : @default_mirrors);
-my @RUNSCRIPTS  = map { chomp; $_ } map { split(qr/,/, $_) } (@runscripts ? @runscripts : ());
+my @RUNSCRIPTS  = map { chomp; $_ } map { split(qr/,/, $_) } @runscripts;
+my @EXESUFFIXES = sort map { chomp; $_ } map { split(qr/,/, $_) } @exesuffixes;
+my @CONFARGS    = join " ", map { chomp; $_ } @confargs; # repeatable, but no comma-separate
 
 # ========== build dependencies ==========
 
@@ -354,8 +360,6 @@ if ($installdeps) {
 }
 
 # ========== prepare ==========
-
-my @EXE_SUFFIXES = sort split /\s+/, $ENV{CODESPEED_EXECUTABLE_SUFFIXES} || "";
 
 print_and_system "mkdir -p $build_path";
 
@@ -404,6 +408,7 @@ print "  Bootstrap Perl\n";
 print "  --------------\n\n";
 print "  version:        $version\n\n";
 print "  git-describe:   $gitversion\n\n";
+print "  configureargs:  ".join("\n                  ", @confargs)."\n\n";
 print "  CPAN mirrors:   ".join("\n                  ", @CPANMIRRORS)."\n\n";
 print "  modules:        ".join("\n                  ", @MODULES)."\n\n";
 print "  scripts:        ".join("\n                  ", map { $_ ." ".join(" ", @runargs) } @RUNSCRIPTS)."\n\n";
@@ -417,8 +422,8 @@ unless (defined $perl_revision && defined $perl_version)
         exit 1;
 }
 
-my $codespeed_executable =            _perl_exe_name  ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, \@EXE_SUFFIXES);
-my $PREFIX               = $prefix || _perl_pathprefix($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, \@EXE_SUFFIXES);
+my $codespeed_executable =            _perl_exe_name  ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, \@EXESUFFIXES);
+my $PREFIX               = $prefix || _perl_pathprefix($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, \@EXESUFFIXES);
 my $USETHREADS           = $usethreads ? "-Dusethreads"  : "";
 my $BIT64                = $bit64      ? "-Duse64bitall" : "";
 
@@ -438,7 +443,7 @@ if (! -e $perl_gitversion and ! -e $perl_codespeed)
 {
         # ========== configure ==========
 
-        print_and_system "cd $build_path_perl; sh Configure -de -Dusedevel $USETHREADS $BIT64 -Dprefix=$PREFIX";
+        print_and_system "cd $build_path_perl; sh Configure -de -Dusedevel $USETHREADS $BIT64 $CONFARGS -Dprefix=$PREFIX";
 
 
         # ========== make ==========
