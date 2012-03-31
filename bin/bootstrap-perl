@@ -252,8 +252,8 @@ sub _perl_base_name {
         my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, $exe_suffixes) = @_;
         return join("-",
                     "$perl_revision.$perl_version",
-                    ($usethreads ? "y" : "n" )."T",
-                    ($bit64      ? "y" : "n" )."64",
+                    ($usethreads ? "" : "no" )."thread",
+                    ($bit64      ? "" : "no" )."64bit",
                     @$exe_suffixes,
                    );
 }
