@@ -447,7 +447,10 @@ my $DRY = $dry ? "-n" : "";
 
 # ========== build ==========
 
-if (! -e $perl_gitchangeset and ! -e $perl_codespeed)
+if (! -e $perl_gitchangeset or
+    ! -e $perl_gitdescribe or
+    ! -e $perl_codespeed
+   )
 {
         # ========== configure ==========
 
