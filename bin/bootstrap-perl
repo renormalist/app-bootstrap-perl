@@ -214,6 +214,7 @@ my $usethreads          = 1;
 my $bit64               = 1;
 my $help                = 0;
 my $test                = 0;
+my $cpan                = 1;
 my $jobs                = $threadcount;
 my @mirrors;
 my @modules;
@@ -296,6 +297,7 @@ my $ok = GetOptions (
                      "help|h"       => \$help,
                      "jobs|j=i"     => \$jobs,
                      "test|t"       => \$test,
+                     "cpan!"        => \$cpan,
                      'dry|n'        => \$dry,
                      'mirror|m=s@'  => \@mirrors,
                      'module|M=s@'  => \@modules,
@@ -514,75 +516,78 @@ print_and_system "ln -sf $POD2TEXT $PREFIX/bin/pod2text";
 
 # ========== cpan ==========
 
-# distroprefs: get all from git
-print_and_system "mkdir -p $DISTROPREFSSRCBASE";
-print_and_system "cd $DISTROPREFSSRCBASE ; git clone $DISTROPREFSREPO";
-print_and_system "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs ; git pull";
-print_and_system "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs ; git submodule update --init --recursive";
-print_and_system "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs ; git pull";
-# distroprefs: merge our flavour
-print_and_system qq!mkdir -p $DISTROPREFSDIR!;
-print_and_system qq!rsync -r $DISTROPREFSSRC1/ $DISTROPREFSDIR/!;
-print_and_system qq!rsync -r $DISTROPREFSSRC2/ $DISTROPREFSDIR/!;
+if ($cpan)
+{
+        # distroprefs: get all from git
+        print_and_system "mkdir -p $DISTROPREFSSRCBASE";
+        print_and_system "cd $DISTROPREFSSRCBASE ; git clone $DISTROPREFSREPO";
+        print_and_system "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs ; git pull";
+        print_and_system "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs ; git submodule update --init --recursive";
+        print_and_system "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs ; git pull";
+        # distroprefs: merge our flavour
+        print_and_system qq!mkdir -p $DISTROPREFSDIR!;
+        print_and_system qq!rsync -r $DISTROPREFSSRC1/ $DISTROPREFSDIR/!;
+        print_and_system qq!rsync -r $DISTROPREFSSRC2/ $DISTROPREFSDIR/!;
 
-# Configure CPAN initially
-my $CFG = print_and_qx qq!$PERLDOC -l CPAN | sed -e "s/CPAN\.pm/CPAN\\/Config.pm/"!; chomp $CFG;
+        # Configure CPAN initially
+        my $CFG = print_and_qx qq!$PERLDOC -l CPAN | sed -e "s/CPAN\.pm/CPAN\\/Config.pm/"!; chomp $CFG;
 
-if (! -e $CFG) {
-        my $CPANCFG = do { local $/; <DATA> };
-        my $MIRRORSLIST = join(" ", @CPANMIRRORS);
-        $CPANCFG =~ s/__DISTROPREFSDIR__/$DISTROPREFSDIR/;
-        $CPANCFG =~ s/__MIRRORS__/$MIRRORSLIST/;
-        open CPANCFG, ">", $CFG or die "Can not create $CFG";
-        print CPANCFG $CPANCFG;
-        close CPANCFG;
-}
+        if (! -e $CFG) {
+                my $CPANCFG = do { local $/; <DATA> };
+                my $MIRRORSLIST = join(" ", @CPANMIRRORS);
+                $CPANCFG =~ s/__DISTROPREFSDIR__/$DISTROPREFSDIR/;
+                $CPANCFG =~ s/__MIRRORS__/$MIRRORSLIST/;
+                open CPANCFG, ">", $CFG or die "Can not create $CFG";
+                print CPANCFG $CPANCFG;
+                close CPANCFG;
+        }
 
-# remove stale cpan lock
-my $cpanlock = "$prefixbase/cpan/.lock";
-if (-e $cpanlock) {
-	my ($pid, $host) = qx!cat $cpanlock!;
-	chomp $pid;
-	my $exists = kill 0, $pid;
-	if (not $exists) {
-		print "Remove stale CPAN.pm lock.\n";
-		print_and_system qq!rm -f $cpanlock!;
-	}
-}
+        # remove stale cpan lock
+        my $cpanlock = "$prefixbase/cpan/.lock";
+        if (-e $cpanlock) {
+                my ($pid, $host) = qx!cat $cpanlock!;
+                chomp $pid;
+                my $exists = kill 0, $pid;
+                if (not $exists) {
+                        print "Remove stale CPAN.pm lock.\n";
+                        print_and_system qq!rm -f $cpanlock!;
+                }
+        }
 
-# force a CPAN.pm with all features we need
-print_and_system qq{if ! $PERL -M"CPAN 1.98" -e1 ; then echo "force install CPAN" | $PERL -MCPAN -e shell ; fi };
+        # force a CPAN.pm with all features we need
+        print_and_system qq{if ! $PERL -M"CPAN 1.98" -e1 ; then echo "force install CPAN" | $PERL -MCPAN -e shell ; fi };
 
-# configure
-print_and_system qq!echo "o conf auto_commit 1 ; o conf commit"                     | $PERL -MCPAN -e shell!;
+        # configure
+        print_and_system qq!echo "o conf auto_commit 1 ; o conf commit"                     | $PERL -MCPAN -e shell!;
 
-# once upon a time the cpan exe missed the executable bit - set it to be sure
-print_and_system qq!chmod +x $CPAN!;
+        # once upon a time the cpan exe missed the executable bit - set it to be sure
+        print_and_system qq!chmod +x $CPAN!;
 
-# install extended cpan toolchain; contains some "force" where we know they are really required
-print_and_system qq! echo "install YAML"                      | $PERL -MCPAN -e shell!;
-print_and_system qq{if ! $PERL -MYAML -e1 ;         then echo "force install YAML"         | $PERL -MCPAN -e shell ; fi };
-print_and_system qq{if ! $PERL -MIO::Compress::Base -e1 ; then echo "force install IO::Compress::Base" | $PERL -MCPAN -e shell ; fi };
-if ($gitdescribe =~ /perl-5\.8\.0/) {
-        # ignore known failing tests
-	print_and_system qq! echo "force install Module::Build" | $PERL -MCPAN -e shell!;
-}
-if ($gitdescribe =~ /perl-5\.15\./) {
-        # ignore known failing tests
-	print_and_system qq! echo "force install Devel::Size" | $PERL -MCPAN -e shell!;
-}
-print_and_system qq! echo "force install version"             | $PERL -MCPAN -e shell!;
-print_and_system qq! echo "install CPAN::SQLite"              | $PERL -MCPAN -e shell!;
-print_and_system qq! echo "install YAML::Syck"                | $PERL -MCPAN -e shell!;
-print_and_system qq! echo "install IO::Tty"                   | $PERL -MCPAN -e shell!;
-print_and_system qq! echo "install Expect"                    | $PERL -MCPAN -e shell!;
-print_and_system qq! echo "install Bundle::CPAN"              | $PERL -MCPAN -e shell!;
-print_and_system qq! echo "install LWP"                       | $PERL -MCPAN -e shell!;
+        # install extended cpan toolchain; contains some "force" where we know they are really required
+        print_and_system qq! echo "install YAML"                      | $PERL -MCPAN -e shell!;
+        print_and_system qq{if ! $PERL -MYAML -e1 ;         then echo "force install YAML"         | $PERL -MCPAN -e shell ; fi };
+        print_and_system qq{if ! $PERL -MIO::Compress::Base -e1 ; then echo "force install IO::Compress::Base" | $PERL -MCPAN -e shell ; fi };
+        if ($gitdescribe =~ /perl-5\.8\.0/) {
+                # ignore known failing tests
+                print_and_system qq! echo "force install Module::Build" | $PERL -MCPAN -e shell!;
+        }
+        if ($gitdescribe =~ /perl-5\.15\./) {
+                # ignore known failing tests
+                print_and_system qq! echo "force install Devel::Size" | $PERL -MCPAN -e shell!;
+        }
+        print_and_system qq! echo "force install version"             | $PERL -MCPAN -e shell!;
+        print_and_system qq! echo "install CPAN::SQLite"              | $PERL -MCPAN -e shell!;
+        print_and_system qq! echo "install YAML::Syck"                | $PERL -MCPAN -e shell!;
+        print_and_system qq! echo "install IO::Tty"                   | $PERL -MCPAN -e shell!;
+        print_and_system qq! echo "install Expect"                    | $PERL -MCPAN -e shell!;
+        print_and_system qq! echo "install Bundle::CPAN"              | $PERL -MCPAN -e shell!;
+        print_and_system qq! echo "install LWP"                       | $PERL -MCPAN -e shell!;
 
-# install modules from CPAN
-foreach my $module (@MODULES) {
-        print_and_system qq!$CPAN $module!;
-}
+        # install modules from CPAN
+        foreach my $module (@MODULES) {
+                print_and_system qq!$CPAN $module!;
+        }
+} # if ($cpan)
 
 # Run scripts from inside the just installed Perl
 foreach my $runscript (@RUNSCRIPTS) {
