@@ -384,8 +384,9 @@ print_and_system "cd $build_path_perl ; git pull";
 print_and_system "cd $build_path_perl ; git checkout $version";
 print_and_system "cd $build_path_perl ; git pull";
 
-# cherry pick several bugfixes in 5.8.8 that break building
-if ($version =~ /5\.8\./ or $version =~ /5\.9\.0/) {
+# cherry pick several bugfixes in 5.8/5.9 that break building
+if ($version =~ /(v|perl-)?5\.8\./ or $version =~ /(v|perl-)?5\.9\.[01234]/) {
+        print "*** cherry-pick building fixes for older perl versions\n";
         # FIX: <command-line>
         print_and_system qq!cd $build_path_perl ; git cherry-pick -n cf14425e2bd169ce935f76d359f3253b51e441a0!;
         # FIX: rebuild / gcc -g
