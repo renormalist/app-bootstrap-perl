@@ -447,11 +447,9 @@ my $DRY = $dry ? "-n" : "";
 
 # ========== build ==========
 
-if (! -e $perl_gitchangeset or
-    ! -e $perl_gitdescribe or
-    ! -e $perl_codespeed
-   )
+if ( ! -e $perl_codespeed )
 {
+        print "*** BUILD perl\n";
         # ========== configure ==========
 
         print_and_system "cd $build_path_perl; sh Configure -de -Dusedevel $USETHREADS $BIT64 $CONFARGS -Dprefix=$PREFIX";
