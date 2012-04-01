@@ -578,6 +578,10 @@ if ($cpan)
                 # ignore known failing tests
                 print_and_system qq! echo "force install Module::Build" | $PERL -MCPAN -e shell!;
         }
+        if ($gitdescribe =~ /perl-5\.9\./) {
+                # ignore known hanging tests with utf8
+                print_and_system qq! echo "notest install Test::Simple" | $PERL -MCPAN -e shell!;
+        }
         if ($gitdescribe =~ /perl-5\.15\./) {
                 # ignore known failing tests
                 print_and_system qq! echo "force install Devel::Size" | $PERL -MCPAN -e shell!;
