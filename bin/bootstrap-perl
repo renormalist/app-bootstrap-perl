@@ -399,10 +399,13 @@ if ($version =~ /(v|perl-)?5\.8\./ or $version =~ /(v|perl-)?5\.9\.[01234]/) {
 
 # ========== prepare paths ==========
 
-my $gitdescribe           = print_and_qx qq!cd $build_path_perl ; git describe --all!; chomp $gitdescribe; $gitdescribe =~ s|^tags/||g;
-my $gitchangeset          = print_and_qx qq!cd $build_path_perl ; git rev-parse HEAD!; chomp $gitchangeset;
+my $gitdescribe;
+$gitdescribe = print_and_qx qq!cd $build_path_perl ; git describe --all!;
+$gitdescribe = print_and_qx qq!cd $build_path_perl ; git describe! if $gitdescribe =~ m,heads/,;
+chomp $gitdescribe; $gitdescribe =~ s|^tags/||g;
+my $gitchangeset = print_and_qx qq!cd $build_path_perl ; git rev-parse HEAD!; chomp $gitchangeset;
 my ($perl_revision, $perl_version, $perl_subversion) = $gitdescribe =~ m/^\D*(\d+)[._](\d+)(?:[._](\d+))?.*$/g;
-$perl_version             = sprintf("%02d", $perl_version);
+$perl_version    = sprintf("%02d", $perl_version);
 $perl_subversion ||= 0;
 
 print "\n";
