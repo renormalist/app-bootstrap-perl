@@ -401,7 +401,7 @@ if ($version =~ /(v|perl-)?5\.8\./ or $version =~ /(v|perl-)?5\.9\.[01234]/) {
 
 my $gitdescribe;
 $gitdescribe = print_and_qx qq!cd $build_path_perl ; git describe --all!;
-$gitdescribe = print_and_qx qq!cd $build_path_perl ; git describe! if $gitdescribe =~ m,heads/,;
+$gitdescribe = print_and_qx qq!cd $build_path_perl ; git describe! if ($gitdescribe =~ m,/, && $gitdescribe !~ m,tags/,);
 chomp $gitdescribe; $gitdescribe =~ s|^tags/||g;
 my $gitchangeset = print_and_qx qq!cd $build_path_perl ; git rev-parse HEAD!; chomp $gitchangeset;
 my ($perl_revision, $perl_version, $perl_subversion) = $gitdescribe =~ m/^\D*(\d+)[._](\d+)(?:[._](\d+))?.*$/g;
