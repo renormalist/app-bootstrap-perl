@@ -552,11 +552,16 @@ print "# PERL:     $PERL\n";
 print "# PERLDOC:  $PERLDOC\n";
 print "# POD2TEXT: $POD2TEXT\n";
 
+my $bin_perl     = "$PREFIX/bin/perl";
+my $bin_cpan     = "$PREFIX/bin/cpan";
+my $bin_perldoc  = "$PREFIX/bin/perldoc";
+my $bin_pod2text = "$PREFIX/bin/pod2text";
+
 # some dists don't find the versioned developer files
-print_and_system "ln -sf $PERL     $PREFIX/bin/perl";
-print_and_system "ln -sf $CPAN     $PREFIX/bin/cpan";
-print_and_system "ln -sf $PERLDOC  $PREFIX/bin/perldoc";
-print_and_system "ln -sf $POD2TEXT $PREFIX/bin/pod2text";
+print_and_system "ln -sf $PERL     $bin_perl";
+print_and_system "ln -sf $CPAN     $bin_cpan";
+print_and_system "ln -sf $PERLDOC  $bin_perldoc";
+print_and_system "ln -sf $POD2TEXT $bin_pod2text";
 
 # ========== cpan ==========
 
@@ -598,42 +603,46 @@ if ($cpan)
                 }
         }
 
-        # force a CPAN.pm with all features we need
+        # force a CPAN.pm with all features we need, assume old-school CPAN.pm
         print_and_system qq{if ! $PERL -M"CPAN 1.98" -e1 ; then echo "force install CPAN" | $PERL -MCPAN -e shell ; fi };
 
         # configure
-        print_and_system qq!echo "o conf auto_commit 1 ; o conf commit"                     | $PERL -MCPAN -e shell!;
+        print_and_system qq!echo "o conf auto_commit 1 ; o conf commit" | $bin_cpan -j $CFG!;
 
         # once upon a time the cpan exe missed the executable bit - set it to be sure
         print_and_system qq!chmod +x $CPAN!;
 
         # install extended cpan toolchain; contains some "force" where we know they are really required
-        print_and_system qq! echo "install YAML"                      | $PERL -MCPAN -e shell!;
-        print_and_system qq{if ! $PERL -MYAML -e1 ;         then echo "force install YAML"         | $PERL -MCPAN -e shell ; fi };
-        print_and_system qq{if ! $PERL -MIO::Compress::Base -e1 ; then echo "force install IO::Compress::Base" | $PERL -MCPAN -e shell ; fi };
+        print_and_system qq!$bin_cpan -j $CFG YAML!;
+        print_and_system qq{if ! $PERL -MYAML -e1 ; then $bin_cpan -j $CFG -f -i YAML ; fi };
+        print_and_system qq{if ! $PERL -MIO::Compress::Base -e1 ; then $bin_cpan -j $CFG -f -i IO::Compress::Base ; fi };
         if ($gitdescribe =~ /perl-5\.8\.0/) {
                 # ignore known failing tests
-                print_and_system qq! echo "force install Module::Build" | $PERL -MCPAN -e shell!;
+                print_and_system qq!$bin_cpan -j $CFG -f -i Module::Build!;
         }
         if ($gitdescribe =~ /perl-5\.9\./) {
                 # ignore known hanging tests with utf8
-                print_and_system qq! echo "notest install Test::Simple" | $PERL -MCPAN -e shell!;
+                print_and_system qq! echo "notest install Test::Simple" | $bin_cpan -j $CFG!;
         }
         if ($gitdescribe =~ /perl-5\.15\./) {
                 # ignore known failing tests
-                print_and_system qq! echo "force install Devel::Size" | $PERL -MCPAN -e shell!;
+                print_and_system qq!$bin_cpan -j $CFG -f -i Devel::Size!;
         }
-        print_and_system qq! echo "force install version"             | $PERL -MCPAN -e shell!;
-        print_and_system qq! echo "install CPAN::SQLite"              | $PERL -MCPAN -e shell!;
-        print_and_system qq! echo "install YAML::Syck"                | $PERL -MCPAN -e shell!;
-        print_and_system qq! echo "install IO::Tty"                   | $PERL -MCPAN -e shell!;
-        print_and_system qq! echo "install Expect"                    | $PERL -MCPAN -e shell!;
-        print_and_system qq! echo "install Bundle::CPAN"              | $PERL -MCPAN -e shell!;
-        print_and_system qq! echo "install LWP"                       | $PERL -MCPAN -e shell!;
+        print_and_system qq{if ! $PERL -M"version 0.97" -e1 ; then $bin_cpan -j $CFG -f -i version ; fi };
+        print_and_system qq!$bin_cpan -j $CFG    -i CPAN::SQLite!;
+        print_and_system qq!$bin_cpan -j $CFG    -i YAML::Syck!;
+        print_and_system qq!$bin_cpan -j $CFG    -i IO::Tty!;
+        print_and_system qq!$bin_cpan -j $CFG    -i Expect!;
+        print_and_system qq!$bin_cpan -j $CFG    -i Bundle::CPAN!;
+        print_and_system qq!$bin_cpan -j $CFG    -i LWP!;
 
         # install modules from CPAN
         foreach my $module (@MODULES) {
-                print_and_system qq!$CPAN $module!;
+                if ($module eq "Mail::SPF") {
+                        # CPAN does not find it in strange path, so we check availablility by ourself
+                        print_and_system qq{if ! $PERL -M$module -e1 ; then $bin_cpan -j $CFG -f -i $module ; fi };
+                }
+                print_and_system qq!$bin_cpan -j $CFG -i $module!;
         }
 } # if ($cpan)
 
