@@ -215,6 +215,8 @@ my $bit64               = 1;
 my $help                = 0;
 my $test                = 0;
 my $cpan                = 1;
+my $perlformance        = 0;
+my $perlformance_report = 0;
 my $jobs                = $threadcount;
 my @mirrors;
 my @modules;
@@ -298,6 +300,8 @@ my $ok = GetOptions (
                      "jobs|j=i"     => \$jobs,
                      "test|t"       => \$test,
                      "cpan!"        => \$cpan,
+                     'perlformance' => \$perlformance,
+                     'perlformance-report' => \$perlformance_report,
                      'dry|n'        => \$dry,
                      'mirror|m=s@'  => \@mirrors,
                      'module|M=s@'  => \@modules,
@@ -311,6 +315,41 @@ my $ok = GetOptions (
 if ($help) {
         print "\nPlease see 'perldoc bootstrap-perl' for help.\n";
         exit 0;
+}
+
+# --perlformance is a shortcut for
+#   -M Digest::SHA1,\
+#      DB_File,\
+#      Mail::SPF,\
+#      Mail::DKIM,\
+#      IP::Country,\
+#      Net::Ident,\
+#      IO::Socket::INET6,\
+#      Encode::Detect,\
+#      Benchmark::Perl::Formance,Bundle::PerlFormance, \
+#      Tapper::TestSuite::Benchmark::Perl::Formance \
+#   -m http://perlformance.net/CPAN/ \
+#   --run benchmark-perlformance \
+#   --runargs=--plugins=ALL
+if ($perlformance or $perlformance_report) {
+        @modules = qw( Digest::SHA1
+                       DB_File
+                       Mail::SPF
+                       Mail::DKIM
+                       IP::Country
+                       Net::Ident
+                       IO::Socket::INET6
+                       Encode::Detect
+                       Benchmark::Perl::Formance
+                       Tapper::TestSuite::Benchmark::Perl::Formance
+                       Bundle::PerlFormance
+                    );
+        @mirrors = qw(http://perlformance.net/CPAN/);
+        @runscripts = qw(benchmark-perlformance);
+}
+if ($perlformance_report) {
+        @runscripts = qw(tapper-testsuite-benchmark-perlformance);
+        @confargs = qw(--plugins=ALL);
 }
 
 # modules/mirros/runscripts can be comma-separated
