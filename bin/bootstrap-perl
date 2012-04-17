@@ -349,7 +349,7 @@ if ($perlformance or $perlformance_report) {
 }
 if ($perlformance_report) {
         @runscripts = qw(tapper-testsuite-benchmark-perlformance);
-        @confargs = qw(--plugins=ALL);
+        @runargs    = qw(--plugins=ALL);
 }
 
 # modules/mirros/runscripts can be comma-separated
