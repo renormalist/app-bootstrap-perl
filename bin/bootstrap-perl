@@ -140,6 +140,16 @@ Run these scripts relative to built <PREFIX>/bin/:
 
 (Option can be repeated and allow comma separated lists.)
 
+=head3 run Perl::Formance benchmarks
+
+To do everything in one go needed for running
+Benchmark::Perl::Formance do:
+
+  $ bootstrap-perl --perlformance
+
+This is a shortcut for C<-M Digest::SHA1,DB_File,Mail::SPF,Mail::DKIM,IP::Country,Net::Ident,IO::Socket::INET6,Encode::Detect,Benchmark::Perl::Formance,Bundle::PerlFormance,Tapper::TestSuite::Benchmark::Perl::Formance> C<-m http://perlformance.net/CPAN/> C<--run benchmark-perlformance> C<--runargs=--plugins=ALL>.
+
+
 =head2 Unified installation prefix schema
 
 It uses a unified naming schema for it's installation PREFIX:
