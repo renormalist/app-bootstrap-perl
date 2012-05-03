@@ -739,6 +739,6 @@ $CPAN::Config = {
   'version_timeout' => q[15],
   'wget' => q[/usr/bin/wget],
   'yaml_load_code' => q[0],
-  'yaml_module' => q[YAML::XS],
+  'yaml_module' => q[YAML],
 };
 1;
