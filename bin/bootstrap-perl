@@ -623,6 +623,7 @@ if ($cpan)
         print_and_system qq!chmod +x $CPAN!;
 
         # install extended cpan toolchain; contains some "force" where we know they are really required
+        print_and_system qq!$bin_cpan -j $CFG YAML::XS!;
         print_and_system qq!$bin_cpan -j $CFG YAML!;
         print_and_system qq{if ! $PERL -MYAML -e1 ; then $bin_cpan -j $CFG -f -i YAML ; fi };
         print_and_system qq{if ! $PERL -MIO::Compress::Base -e1 ; then $bin_cpan -j $CFG -f -i IO::Compress::Base ; fi };
@@ -670,11 +671,13 @@ __DATA__
 # ~/.cpan/CPAN/MyConfig.pm.
 
 $CPAN::Config = {
+  'applypatch' => q[/usr/bin/applypatch],
   'auto_commit' => q[1],
   'build_cache' => q[10],
   'build_dir' => q[/opt/cpan/build],
   'build_dir_reuse' => q[0],
   'build_requires_install_policy' => q[yes],
+  'bzip2' => q[/bin/bzip2],
   'cache_metadata' => q[0],
   'check_sigs' => q[0],
   'colorize_debug' => q[bold cyan],
@@ -721,7 +724,9 @@ $CPAN::Config = {
   'prerequisites_policy' => q[follow],
   'scan_cache' => q[atstart],
   'shell' => q[/bin/bash],
+  'show_unparsable_versions' => q[0],
   'show_upload_date' => q[0],
+  'show_zero_versions' => q[0],
   'tar' => q[/bin/tar],
   'tar_verbosity' => q[v],
   'term_is_latin' => q[0],
@@ -731,7 +736,9 @@ $CPAN::Config = {
   'unzip' => q[],
   'urllist' => [qw[__MIRRORS__]],
   'use_sqlite' => q[1],
+  'version_timeout' => q[15],
   'wget' => q[/usr/bin/wget],
   'yaml_load_code' => q[0],
+  'yaml_module' => q[YAML::XS],
 };
 1;
