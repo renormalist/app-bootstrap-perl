@@ -568,10 +568,10 @@ my $bin_perldoc  = "$PREFIX/bin/perldoc";
 my $bin_pod2text = "$PREFIX/bin/pod2text";
 
 # some dists don't find the versioned developer files
-print_and_system "ln -sf $PERL     $bin_perl";
-print_and_system "ln -sf $CPAN     $bin_cpan";
-print_and_system "ln -sf $PERLDOC  $bin_perldoc";
-print_and_system "ln -sf $POD2TEXT $bin_pod2text";
+print_and_system "if [ ! -e $bin_perl     ] ; then ln -sf $PERL     $bin_perl     ; fi";
+print_and_system "if [ ! -e $bin_cpan     ] ; then ln -sf $CPAN     $bin_cpan     ; fi";
+print_and_system "if [ ! -e $bin_perldoc  ] ; then ln -sf $PERLDOC  $bin_perldoc  ; fi";
+print_and_system "if [ ! -e $bin_pod2text ] ; then ln -sf $POD2TEXT $bin_pod2text ; fi";
 
 # ========== cpan ==========
 
@@ -614,13 +614,17 @@ if ($cpan)
         }
 
         # force a CPAN.pm with all features we need, assume old-school CPAN.pm
-        print_and_system qq{if ! $PERL -M"CPAN 1.98" -e1 ; then echo "force install CPAN" | $PERL -MCPAN -e shell ; fi };
+        print_and_system qq{if [ -L $bin_cpan -o ! -e $bin_cpan ] ; then /bin/rm $bin_cpan ; echo "force install CPAN" | $PERL -MCPAN -e shell ; fi};
+
+	exit 1;
+
 
         # configure
         print_and_system qq!echo "o conf auto_commit 1 ; o conf commit" | $bin_cpan -j $CFG!;
 
         # once upon a time the cpan exe missed the executable bit - set it to be sure
         print_and_system qq!chmod +x $CPAN!;
+        print_and_system qq!chmod +x $bin_cpan!;
 
         # install extended cpan toolchain; contains some "force" where we know they are really required
         print_and_system qq!$bin_cpan -j $CFG YAML::XS!;
