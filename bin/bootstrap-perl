@@ -147,7 +147,7 @@ Benchmark::Perl::Formance do:
 
   $ bootstrap-perl --perlformance
 
-This is a shortcut for C<-M Digest::SHA1,DB_File,Mail::SPF,Mail::DKIM,IP::Country,Net::Ident,IO::Socket::INET6,Encode::Detect,Benchmark::Perl::Formance,Bundle::PerlFormance,Tapper::TestSuite::Benchmark::Perl::Formance> C<-m http://perlformance.net/CPAN/> C<--run benchmark-perlformance> C<--runargs=--plugins=ALL>.
+This is a shortcut for C<-M Digest::SHA1,DB_File,Mail::DKIM,IP::Country,Net::Ident,IO::Socket::INET6,Encode::Detect,Benchmark::Perl::Formance,Bundle::PerlFormance,Tapper::TestSuite::Benchmark::Perl::Formance> C<-m http://perlformance.net/CPAN/> C<--run benchmark-perlformance> C<--runargs=--plugins=ALL>.
 
 
 =head2 Unified installation prefix schema
@@ -330,7 +330,6 @@ if ($help) {
 # --perlformance is a shortcut for
 #   -M Digest::SHA1,\
 #      DB_File,\
-#      Mail::SPF,\
 #      Mail::DKIM,\
 #      IP::Country,\
 #      Net::Ident,\
@@ -344,7 +343,9 @@ if ($help) {
 if ($perlformance or $perlformance_report) {
         @modules = qw( Digest::SHA1
                        DB_File
-                       Mail::SPF
+                       RGARCIA/Safe-2.29.tar.gz
+                       Safe
+                       Module::Build
                        Mail::DKIM
                        IP::Country
                        Net::Ident
@@ -650,10 +651,6 @@ if ($cpan)
 
         # install modules from CPAN
         foreach my $module (@MODULES) {
-                if ($module eq "Mail::SPF") {
-                        # CPAN does not find it in strange path, so we check availablility by ourself
-                        print_and_system qq{if ! $PERL -M$module -e1 ; then $bin_cpan -j $CFG -f -i $module ; fi };
-                }
                 print_and_system qq!$bin_cpan -j $CFG -i $module!;
         }
 } # if ($cpan)
