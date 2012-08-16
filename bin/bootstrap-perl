@@ -616,9 +616,6 @@ if ($cpan)
         # force a CPAN.pm with all features we need, assume old-school CPAN.pm
         print_and_system qq{if [ -L $bin_cpan -o ! -e $bin_cpan ] ; then /bin/rm $bin_cpan ; echo "force install CPAN" | $PERL -MCPAN -e shell ; fi};
 
-	exit 1;
-
-
         # configure
         print_and_system qq!echo "o conf auto_commit 1 ; o conf commit" | $bin_cpan -j $CFG!;
 
