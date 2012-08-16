@@ -629,6 +629,16 @@ if ($cpan)
         # install extended cpan toolchain; contains some "force" where we know they are really required
         print_and_system qq!$bin_cpan -j $CFG YAML::XS!;
         print_and_system qq!$bin_cpan -j $CFG YAML!;
+        # try every YAML under the Sun - yes this IS pain!
+        print_and_system qq{if ! $PERL -MYAML -e1 ; then $bin_cpan -j $CFG INGY/YAML-0.76.tar.gz ; fi };
+        print_and_system qq{if ! $PERL -MYAML -e1 ; then $bin_cpan -j $CFG INGY/YAML-0.77.tar.gz ; fi };
+        print_and_system qq{if ! $PERL -MYAML -e1 ; then $bin_cpan -j $CFG INGY/YAML-0.78.tar.gz ; fi };
+        print_and_system qq{if ! $PERL -MYAML -e1 ; then $bin_cpan -j $CFG INGY/YAML-0.79.tar.gz ; fi };
+        print_and_system qq{if ! $PERL -MYAML -e1 ; then $bin_cpan -j $CFG INGY/YAML-0.80.tar.gz ; fi };
+        print_and_system qq{if ! $PERL -MYAML -e1 ; then $bin_cpan -j $CFG INGY/YAML-0.81.tar.gz ; fi };
+        print_and_system qq{if ! $PERL -MYAML -e1 ; then $bin_cpan -j $CFG MSTROUT/YAML-0.82.tar.gz ; fi };
+        print_and_system qq{if ! $PERL -MYAML -e1 ; then $bin_cpan -j $CFG MSTROUT/YAML-0.83.tar.gz ; fi };
+        print_and_system qq{if ! $PERL -MYAML -e1 ; then $bin_cpan -j $CFG MSTROUT/YAML-0.84.tar.gz ; fi };
         print_and_system qq{if ! $PERL -MYAML -e1 ; then $bin_cpan -j $CFG -f -i YAML ; fi };
         print_and_system qq{if ! $PERL -MIO::Compress::Base -e1 ; then $bin_cpan -j $CFG -f -i IO::Compress::Base ; fi };
         if ($gitdescribe =~ /perl-5\.8\.0/) {
