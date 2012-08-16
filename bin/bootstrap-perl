@@ -154,12 +154,12 @@ This is a shortcut for C<-M Digest::SHA1,DB_File,Mail::DKIM,IP::Country,Net::Ide
 
 It uses a unified naming schema for it's installation PREFIX:
 
-  /opt/perl-5.<VERSION>-<(y|n)T>-<(y|n)?64>-<git-describe>
+  /opt/perl-5.<VERSION>-<(no)?thread>-<(no)?64bit>-<git-describe>
 
 which leads to paths like this:
 
-  /opt/perl-5.10-yT-y64-v5.10.0
-  /opt/perl-5.15-yT-y64-v5.15.5-258-ge7d0a3f
+  /opt/perl-5.10-thread-64bit-v5.10.0
+  /opt/perl-5.15-thread-64bit-v5.15.5-258-ge7d0a3f
 
 This naming schema consist of the major version, basic configuration
 and I<git-describe>.
