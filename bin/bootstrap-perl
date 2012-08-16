@@ -225,6 +225,7 @@ my $bit64               = 1;
 my $help                = 0;
 my $test                = 0;
 my $cpan                = 1;
+my $forcecpancfg        = 1;
 my $perlformance        = 0;
 my $perlformance_report = 0;
 my $jobs                = $threadcount;
@@ -310,6 +311,7 @@ my $ok = GetOptions (
                      "jobs|j=i"     => \$jobs,
                      "test|t"       => \$test,
                      "cpan!"        => \$cpan,
+                     "forcecpancfg!" => \$forcecpancfg,
                      'perlformance' => \$perlformance,
                      'perlformance-report' => \$perlformance_report,
                      'dry|n'        => \$dry,
@@ -592,7 +594,7 @@ if ($cpan)
         # Configure CPAN initially
         my $CFG = print_and_qx qq!$PERLDOC -l CPAN | sed -e "s/CPAN\.pm/CPAN\\/Config.pm/"!; chomp $CFG;
 
-        if (! -e $CFG) {
+        if ($forcecpancfg or ! -e $CFG) {
                 my $CPANCFG = do { local $/; <DATA> };
                 my $MIRRORSLIST = join(" ", @CPANMIRRORS);
                 $CPANCFG =~ s/__DISTROPREFSDIR__/$DISTROPREFSDIR/;
