@@ -628,17 +628,35 @@ if ($cpan)
         # install extended cpan toolchain; contains some "force" where we know they are really required
         print_and_system qq!$bin_cpan -j $CFG YAML::XS!;
         print_and_system qq!$bin_cpan -j $CFG YAML!;
-        # try every YAML under the Sun - yes this IS pain!
-        print_and_system qq{if ! $PERL -MYAML -e1 ; then $bin_cpan -j $CFG INGY/YAML-0.76.tar.gz ; fi };
-        print_and_system qq{if ! $PERL -MYAML -e1 ; then $bin_cpan -j $CFG INGY/YAML-0.77.tar.gz ; fi };
-        print_and_system qq{if ! $PERL -MYAML -e1 ; then $bin_cpan -j $CFG INGY/YAML-0.78.tar.gz ; fi };
-        print_and_system qq{if ! $PERL -MYAML -e1 ; then $bin_cpan -j $CFG INGY/YAML-0.79.tar.gz ; fi };
-        print_and_system qq{if ! $PERL -MYAML -e1 ; then $bin_cpan -j $CFG INGY/YAML-0.80.tar.gz ; fi };
-        print_and_system qq{if ! $PERL -MYAML -e1 ; then $bin_cpan -j $CFG INGY/YAML-0.81.tar.gz ; fi };
-        print_and_system qq{if ! $PERL -MYAML -e1 ; then $bin_cpan -j $CFG MSTROUT/YAML-0.82.tar.gz ; fi };
-        print_and_system qq{if ! $PERL -MYAML -e1 ; then $bin_cpan -j $CFG MSTROUT/YAML-0.83.tar.gz ; fi };
-        print_and_system qq{if ! $PERL -MYAML -e1 ; then $bin_cpan -j $CFG MSTROUT/YAML-0.84.tar.gz ; fi };
-        print_and_system qq{if ! $PERL -MYAML -e1 ; then $bin_cpan -j $CFG -f -i YAML ; fi };
+
+        # try really hard with some modules until we find a version
+        # that fits currrent Perl
+        my %mod_dists = (
+                         "YAML" => [qw(MSTROUT/YAML-0.84.tar.gz
+                                       MSTROUT/YAML-0.83.tar.gz
+                                       MSTROUT/YAML-0.82.tar.gz
+                                       INGY/YAML-0.81.tar.gz
+                                       INGY/YAML-0.80.tar.gz
+                                       INGY/YAML-0.79.tar.gz
+                                       INGY/YAML-0.78.tar.gz
+                                       INGY/YAML-0.77.tar.gz
+                                       INGY/YAML-0.76.tar.gz)],
+                         "Devel::Size" => [qw(NWCLARK/Devel-Size-0.78.tar.gz
+                                              NWCLARK/Devel-Size-0.77.tar.gz
+                                              NWCLARK/Devel-Size-0.76.tar.gz
+                                              NWCLARK/Devel-Size-0.75.tar.gz
+                                              BROWSERUK/Devel-Size-0.72.tar.gz
+                                              TELS/devel/Devel-Size-0.71.tar.gz
+                                              TELS/devel/Devel-Size-0.70.tar.gz)],
+                         );
+
+        foreach my $mod (keys %mod_dists) {
+                foreach my $dist (@{$mod_dists{$mod}}) {
+                        print_and_system qq{if ! $PERL -M$mod -e1 ; then $bin_cpan -j $CFG $dist ; fi };
+                }
+                print_and_system qq{if ! $PERL -M$mod -e1 ; then $bin_cpan -j $CFG -f -i $mod ; fi };
+        }
+
         print_and_system qq{if ! $PERL -MIO::Compress::Base -e1 ; then $bin_cpan -j $CFG -f -i IO::Compress::Base ; fi };
         if ($gitdescribe =~ /perl-5\.8\.0/) {
                 # ignore known failing tests
