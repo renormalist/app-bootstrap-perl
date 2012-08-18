@@ -342,10 +342,13 @@ if ($help) {
 #   -m http://perlformance.net/CPAN/ \
 #   --run benchmark-perlformance \
 #   --runargs=--plugins=ALL
+#                       RGARCIA/Safe-2.29.tar.gz
+#                       RGARCIA/Safe-2.30.tar.gz
+#                       RGARCIA/Safe-2.32.tar.gz
+#                       RGARCIA/Safe-2.33.tar.gz
 if ($perlformance or $perlformance_report) {
         @modules = qw( Digest::SHA1
                        DB_File
-                       RGARCIA/Safe-2.29.tar.gz
                        Safe
                        Module::Build
                        Mail::DKIM
@@ -411,7 +414,6 @@ if ($installdeps) {
                 print "Allowed distros: ".join(", ", @SUPPORTED_DISTROS), "\n";
                 exit 1;
         }
-                
 }
 
 # ========== prepare ==========
