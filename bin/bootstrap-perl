@@ -681,6 +681,10 @@ if ($cpan)
         # install modules from CPAN
         foreach my $module (@MODULES) {
                 print_and_system qq!$bin_cpan -j $CFG -i $module!;
+                if ($module =~ qr/^(Benchmark::Perl::Formance|Mail::SPF)$/) {
+                        # That's the whole deal, so we force it.
+                        print_and_system qq{if ! $PERL -M$module -e1 ; then $bin_cpan -j $CFG -f -i $module ; fi };
+                }
         }
 } # if ($cpan)
 
