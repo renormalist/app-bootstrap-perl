@@ -430,23 +430,23 @@ if ( not $build_path_perl && -e $build_path_perl ) {
 }
 
 chdir "$build_path_perl"; # important, I don't remember for what below
-print_and_system "cd $build_path_perl ; rm -f $build_path_perl/.git/index.lock";
-print_and_system "cd $build_path_perl ; git reset --hard";
-print_and_system "cd $build_path_perl ; git clean -dxf";
-print_and_system "cd $build_path_perl ; git checkout blead";
-print_and_system "cd $build_path_perl ; git pull";
-print_and_system "cd $build_path_perl ; git checkout $version";
-print_and_system "cd $build_path_perl ; git pull";
+print_and_system "cd $build_path_perl && rm -f $build_path_perl/.git/index.lock";
+print_and_system "cd $build_path_perl && git reset --hard";
+print_and_system "cd $build_path_perl && git clean -dxf";
+print_and_system "cd $build_path_perl && git checkout blead";
+print_and_system "cd $build_path_perl && git pull";
+print_and_system "cd $build_path_perl && git checkout $version";
+print_and_system "cd $build_path_perl && git pull";
 
 # cherry pick several bugfixes in 5.8/5.9 that break building
 if ($version =~ /(v|perl-)?5\.8\./ or $version =~ /(v|perl-)?5\.9\.[01234]/) {
         print "*** cherry-pick building fixes for older perl versions\n";
         # FIX: <command-line>
-        print_and_system qq!cd $build_path_perl ; git cherry-pick -n cf14425e2bd169ce935f76d359f3253b51e441a0!;
+        print_and_system qq!cd $build_path_perl && git cherry-pick -n cf14425e2bd169ce935f76d359f3253b51e441a0!;
         # FIX: rebuild / gcc -g
-        print_and_system qq!cd $build_path_perl ; git cherry-pick -n a3d1be69db4c082c1b9cef14f51a6e7fe4a9dac9!;
+        print_and_system qq!cd $build_path_perl && git cherry-pick -n a3d1be69db4c082c1b9cef14f51a6e7fe4a9dac9!;
         # FIX: makedepend.SH
-        print_and_system qq!cd $build_path_perl ; git cherry-pick -n 96a8704c85b1e14bb3d63195b0b720f2fd5b8182!;
+        print_and_system qq!cd $build_path_perl && git cherry-pick -n 96a8704c85b1e14bb3d63195b0b720f2fd5b8182!;
         # FIX: create missing link (5.8.8)
         print_and_system q'sudo ln -sf `find  /usr/src -name page.h | grep arch/x86/include/asm/page.h | tail -1` /usr/include/asm/'  if ! -e "/usr/include/asm/page.h";
 }
@@ -454,10 +454,10 @@ if ($version =~ /(v|perl-)?5\.8\./ or $version =~ /(v|perl-)?5\.9\.[01234]/) {
 # ========== prepare paths ==========
 
 my $gitdescribe;
-$gitdescribe = print_and_qx qq!cd $build_path_perl ; git describe --all!;
-$gitdescribe = print_and_qx qq!cd $build_path_perl ; git describe! if ($gitdescribe =~ m,/, && $gitdescribe !~ m,tags/,);
+$gitdescribe = print_and_qx qq!cd $build_path_perl && git describe --all!;
+$gitdescribe = print_and_qx qq!cd $build_path_perl && git describe! if ($gitdescribe =~ m,/, && $gitdescribe !~ m,tags/,);
 chomp $gitdescribe; $gitdescribe =~ s|^tags/||g;
-my $gitchangeset = print_and_qx qq!cd $build_path_perl ; git rev-parse HEAD!; chomp $gitchangeset;
+my $gitchangeset = print_and_qx qq!cd $build_path_perl && git rev-parse HEAD!; chomp $gitchangeset;
 my ($perl_revision, $perl_version, $perl_subversion) = $gitdescribe =~ m/^\D*(\d+)[._](\d+)(?:[._](\d+))?.*$/g;
 $perl_version    = sprintf("%02d", $perl_version);
 $perl_subversion ||= 0;
