@@ -1,0 +1,41 @@
+Revision history for {{$dist->name}}
+
+{{$NEXT}}
+        - Dist::Zilla roundhouse kick
+        - fix unsafe git clean
+        - faster CPAN index expiration
+        - force Benchmark::Perl::Formance
+        - try hard on some essential modules
+        - drop dysfunctional way of CPAN configuring
+        - disable SQLite for CPAN.pm
+        - don't insist on Safe
+        - work around the work-around with symlinks
+        - rework filename scheme
+        - rework git version details
+        - more 5.9.x handling but without success on lots of CPAN deps
+        - rebuild on missing metainfo utils
+        - executable names always 2 minor digits
+        - add libssl-dev to Debian deps
+        - new options
+          --(no)forcecpancfg
+            # force cpan (re)config
+          --(no)cpan
+            # force cpan install
+          --perlformance
+            # shortcut for Perl::Formance
+          --perlformance-report
+            # +report results
+          --blead
+            # for easier micro-tracking
+          --run
+            # run scripts at end
+          --runargs=...
+            # args to run scripts
+          --installprefs=debian
+            # apt-get install known Debian deps
+
+0.02      2012-01-06
+        - distro maintenance
+
+0.01      2011-12-05
+        - initial public version

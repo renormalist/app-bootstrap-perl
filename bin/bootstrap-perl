@@ -1,8 +1,6 @@
 #! /usr/bin/perl
-
-=head1 NAME
-
-bootstrap-perl - Bootstrap Perl inclusive CPAN from git
+# PODNAME: bootstrap-perl
+# ABSTRACT: Bootstrap Perl inclusive CPAN from git
 
 =head1 ABOUT
 
@@ -200,17 +198,6 @@ this is unlikely to be useful for others it is always created.
 
 These two utility scripts B<could> be derived from the install prefix
 but also work when you provided your own prefix.
-
-=head1 AUTHOR
-
-Steffen Schwigon, C<< <ss5 at renormalist.net> >>
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2011 Steffen Schwigon, all rights reserved.
-
-This program is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
 
 =cut
 
