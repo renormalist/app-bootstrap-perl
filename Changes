@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.03      2012-08-24
         - Dist::Zilla roundhouse kick
         - fix unsafe git clean
         - faster CPAN index expiration
