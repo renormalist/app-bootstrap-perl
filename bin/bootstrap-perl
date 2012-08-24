@@ -112,6 +112,21 @@ which is already the default. To build Perl without 64bit use:
 
   $ bootstrap-perl --nouse64bit
 
+=head3 version numbers vs. blead
+
+By default the Perl version number is derived from git-describe and
+kept for later reference (e.g., for codespeed exe name). However, if you
+specify
+
+  $ bootstrap-perl --blead
+
+then the version used in paths or codespeed executables is using
+"blead" in order to generate a make it belong to to a common
+development line besides the yearly segmented graphs.
+
+It is only possible to use C<--blead> with development versions in
+order to create consistent results from only the blead branch.
+
 =head3 configure CPAN and modules
 
 Configure CPAN to use these mirrors:
@@ -220,6 +235,7 @@ my $prefixbase          = "/opt";
 my $version             = "blead";
 my $installdeps;
 my $sourcetgz           = "/var/tmp/perl.tar.gz";
+my $blead               = 0;
 my $usethreads          = 1;
 my $bit64               = 1;
 my $help                = 0;
@@ -264,9 +280,9 @@ sub print_and_qx {
 }
 
 sub _perl_base_name {
-        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, $exe_suffixes) = @_;
+        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, $exe_suffixes, $blead) = @_;
         return join("-",
-                    "$perl_revision.$perl_version",
+                    ($blead      ? "blead" : "$perl_revision.$perl_version"),
                     ($usethreads ? "" : "no" )."thread",
                     ($bit64      ? "" : "no" )."64bit",
                     @$exe_suffixes,
@@ -274,7 +290,7 @@ sub _perl_base_name {
 }
 
 sub _perl_exe_name {
-        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, $exe_suffixes) = @_;
+        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, $exe_suffixes, $blead) = @_;
 
         return join("-",
                     "perl",
@@ -283,12 +299,12 @@ sub _perl_exe_name {
 }
 
 sub _perl_pathprefix {
-        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, $exe_suffixes) = @_;
+        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, $exe_suffixes, $blead) = @_;
 
         return join("-",
                     $prefixbase."/perl",
                     _perl_base_name(@_),
-                    $gitversion,
+                    ($blead ? () : $gitversion),
                    );
 }
 
@@ -305,6 +321,7 @@ my $ok = GetOptions (
                      "version=s"    => \$version,
                      "installdeps=s" => \$installdeps,
                      "sourcetgz=s"  => \$sourcetgz,
+                     "blead!"       => \$blead,
                      "usethreads!"  => \$usethreads,
                      "use64bit!"    => \$bit64,
                      "help|h"       => \$help,
@@ -423,9 +440,9 @@ print_and_system "mkdir -p $build_path";
 if ( not $build_path_perl && -e $build_path_perl ) {
         if (-e $sourcetgz)
         {
-                print_and_system "cd $build_path ; tar xzf $sourcetgz";
+                print_and_system "cd $build_path && tar xzf $sourcetgz";
         } else {
-                print_and_system "cd $build_path ; git clone $giturl";
+                print_and_system "cd $build_path && git clone $giturl";
         }
 }
 
@@ -462,19 +479,6 @@ my ($perl_revision, $perl_version, $perl_subversion) = $gitdescribe =~ m/^\D*(\d
 $perl_version    = sprintf("%02d", $perl_version);
 $perl_subversion ||= 0;
 
-print "\n";
-print "============================================================\n\n";
-print "  Bootstrap Perl\n";
-print "  --------------\n\n";
-print "  version:        $version\n\n";
-print "  git-describe:   $gitdescribe\n\n";
-print "  git-changeset:  $gitchangeset\n\n";
-print "  configureargs:  ".join("\n                  ", @confargs)."\n\n";
-print "  CPAN mirrors:   ".join("\n                  ", @CPANMIRRORS)."\n\n";
-print "  modules:        ".join("\n                  ", @MODULES)."\n\n";
-print "  scripts:        ".join("\n                  ", map { $_ ." ".join(" ", @runargs) } @RUNSCRIPTS)."\n\n";
-print "============================================================\n\n";
-
 unless (defined $perl_revision && defined $perl_version)
 {
         no warnings 'uninitialized';
@@ -483,10 +487,33 @@ unless (defined $perl_revision && defined $perl_version)
         exit 1;
 }
 
-my $codespeed_executable =            _perl_exe_name  ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitdescribe, \@EXESUFFIXES);
-my $PREFIX               = $prefix || _perl_pathprefix($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitdescribe, \@EXESUFFIXES);
+my $codespeed_executable =            _perl_exe_name  ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitdescribe, \@EXESUFFIXES, $blead);
+my $PREFIX               = $prefix || _perl_pathprefix($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitdescribe, \@EXESUFFIXES, $blead);
 my $USETHREADS           = $usethreads ? "-Dusethreads"  : "";
 my $BIT64                = $bit64      ? "-Duse64bitall" : "";
+
+print "\n";
+print "============================================================\n\n";
+print "  Bootstrap Perl\n";
+print "  --------------\n\n";
+print "  version:        $version\n\n";
+print "  git-describe:   $gitdescribe\n\n";
+print "  git-changeset:  $gitchangeset\n\n";
+print "  codespeed name: $codespeed_executable\n\n";
+print "  PREFIX:         $PREFIX\n\n";
+print "  configureargs:  ".join("\n                  ", @confargs)."\n\n";
+print "  CPAN mirrors:   ".join("\n                  ", @CPANMIRRORS)."\n\n";
+print "  modules:        ".join("\n                  ", @MODULES)."\n\n";
+print "  scripts:        ".join("\n                  ", map { $_ ." ".join(" ", @runargs) } @RUNSCRIPTS)."\n\n";
+print "============================================================\n\n";
+
+if ($blead and $perl_version % 2 == 0) {
+        print "# Bummer!\n";
+        print "#   You should use '--blead' only with Perl development versions,\n";
+        print "#   i.e., odd numbers 5.11.x, 5.13.x, 5.15.x, 5.17.x, ...\n";
+        print "#   but you chose: $perl_revision.$perl_version.$perl_subversion\n";
+        exit 1;
+}
 
 $ENV{PERL_AUTOINSTALL} = "--defaultdeps";
 $ENV{TEST_JOBS}        = $threadcount;
@@ -501,10 +528,14 @@ my $DRY = $dry ? "-n" : "";
 
 # ========== build ==========
 
-if ( ! -e $perl_codespeed )
+if ( $blead or ! -e $perl_codespeed )
 {
         print "*** BUILD perl\n";
         # ========== configure ==========
+
+        if ($blead and -d $PREFIX) {
+                print_and_system "rm -f '$PREFIX'";
+        }
 
         print_and_system "cd $build_path_perl; sh Configure -de -Dusedevel $USETHREADS $BIT64 $CONFARGS -Dprefix=$PREFIX";
 
@@ -515,7 +546,7 @@ if ( ! -e $perl_codespeed )
 
         if ($test)
         {
-                my $api_version = `cd $build_path_perl; . ./config.sh ; echo \$api_version`;
+                my $api_version = `cd $build_path_perl; . ./config.sh && echo \$api_version`;
                 chomp $api_version;
 
                 my $TEST = $api_version >= 11 ? "test_harness" : "test"; # only Perl 5.11+
@@ -584,10 +615,10 @@ if ($cpan)
 {
         # distroprefs: get all from git
         print_and_system "mkdir -p $DISTROPREFSSRCBASE";
-        print_and_system "cd $DISTROPREFSSRCBASE ; git clone $DISTROPREFSREPO";
-        print_and_system "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs ; git pull";
-        print_and_system "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs ; git submodule update --init --recursive";
-        print_and_system "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs ; git pull";
+        print_and_system "cd $DISTROPREFSSRCBASE && git clone $DISTROPREFSREPO";
+        print_and_system "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs && git pull";
+        print_and_system "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs && git submodule update --init --recursive";
+        print_and_system "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs && git pull";
         # distroprefs: merge our flavour
         print_and_system qq!mkdir -p $DISTROPREFSDIR!;
         print_and_system qq!rsync -r $DISTROPREFSSRC1/ $DISTROPREFSDIR/!;
