@@ -515,7 +515,14 @@ my $DRY = $dry ? "-n" : "";
 
 # ========== build ==========
 
-if ( $blead or ! -e $perl_codespeed )
+my $existing_version = "";
+if ( -e $perl_gitchangeset ) {
+        $existing_version = qx($perl_gitchangeset);
+        chomp $existing_version;
+}
+
+if ( ! -e $perl_codespeed or
+     ( $blead and $existing_version ne $gitchangeset ) )
 {
         print "*** BUILD perl\n";
         # ========== configure ==========
