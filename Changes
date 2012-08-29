@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.04      2012-08-29
         - use Task::PerlFormance now instead of Bundle::
         - with --blead skip build of same existing version
           (but still benchmark again with --perlformance)
