@@ -1,6 +1,9 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - use Task::PerlFormance now instead of Bundle::
+        - with --blead skip build of same existing version
+          (but still benchmark again with --perlformance)
 
 0.03      2012-08-24
         - Dist::Zilla roundhouse kick
