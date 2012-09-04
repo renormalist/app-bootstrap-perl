@@ -364,7 +364,7 @@ if ($perlformance or $perlformance_report) {
                        Tapper::TestSuite::Benchmark::Perl::Formance
                        Task::PerlFormance
                     );
-        @mirrors = qw(http://perlformance.net/CPAN/);
+        @mirrors = qw(http://perlformance.net/PINTO/perlformance/);
         @runscripts = qw(benchmark-perlformance);
 }
 if ($perlformance_report) {
