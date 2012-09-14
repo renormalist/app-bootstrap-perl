@@ -246,13 +246,11 @@ my $DISTROPREFSSRC2     = "$DISTROPREFSSRCBASE/cpanpm-distroprefs/renormalist/di
 my $DISTROPREFSURL      = 'http://cpansearch.perl.org/src/ANDK/CPAN-1.9800/distroprefs/';
 my $DISTROPREFSDIR      = $prefixbase."/cpan/prefs"; # TODO: CPAN-Config is hardwired, not yet aware of $prefixbase!
 
-# Perl::Formance modules and some explicit dependencies
-my @default_modules = (qw( ));
-
-# http://perlformance.net/CPAN/
-my @default_mirrors = (qw(
-                         http://rub.de/ftp/pub/CPAN/
-                        ));
+# defaults
+my @default_runscripts = ();
+my @default_runargs    = ();
+my @default_modules    = ();
+my @default_mirrors    = (qw( http://rub.de/ftp/pub/CPAN/ ));
 
 sub print_and_system {
         my ($cmd) = @_;
@@ -297,11 +295,6 @@ sub _perl_pathprefix {
 
 # ========== getopt ==========
 
-print "\n";
-print "============================================================\n";
-print "Bootstrap Perl\n";
-print "============================================================\n";
-
 my $ok = GetOptions (
                      "prefix=s"     => \$prefix,
                      "prefixbase=s" => \$prefixbase,
@@ -333,6 +326,11 @@ if ($help) {
         exit 0;
 }
 
+print "\n";
+print "============================================================\n";
+print "Bootstrap Perl\n";
+print "============================================================\n";
+
 # --perlformance is a shortcut for
 #   -M Digest::SHA1,\
 #      DB_File,\
@@ -351,31 +349,33 @@ if ($help) {
 #                       RGARCIA/Safe-2.32.tar.gz
 #                       RGARCIA/Safe-2.33.tar.gz
 if ($perlformance or $perlformance_report) {
-        @modules = qw( Digest::SHA1
-                       DB_File
-                       Safe
-                       Module::Build
-                       Mail::DKIM
-                       IP::Country
-                       Net::Ident
-                       IO::Socket::INET6
-                       Encode::Detect
-                       Benchmark::Perl::Formance
-                       Tapper::TestSuite::Benchmark::Perl::Formance
-                       Task::PerlFormance
-                    );
-        @mirrors = qw(http://perlformance.net/PINTO/perlformance/);
-        @runscripts = qw(benchmark-perlformance);
+        @default_modules = qw( Digest::SHA1
+                               DB_File
+                               Safe
+                               Module::Build
+                               Mail::DKIM
+                               IP::Country
+                               Net::Ident
+                               IO::Socket::INET6
+                               Encode::Detect
+                               Benchmark::Perl::Formance
+                               Tapper::TestSuite::Benchmark::Perl::Formance
+                               Task::PerlFormance
+                            );
+        @default_mirrors = qw(http://perlformance.net/PINTO/perlformance/);
+        @default_runscripts = qw(benchmark-perlformance);
+        @default_runargs    = qw(--plugins=ALL);
 }
 if ($perlformance_report) {
-        @runscripts = qw(tapper-testsuite-benchmark-perlformance);
-        @runargs    = qw(--plugins=ALL);
+        @default_runscripts = qw(tapper-testsuite-benchmark-perlformance);
+        @default_runargs    = qw(--plugins=ALL);
 }
 
 # modules/mirros/runscripts can be comma-separated
-my @MODULES     = map { chomp; $_ } map { split(qr/,/, $_) } (@modules ? @modules : @default_modules);
-my @CPANMIRRORS = map { chomp; $_ } map { split(qr/,/, $_) } (@mirrors ? @mirrors : @default_mirrors);
-my @RUNSCRIPTS  = map { chomp; $_ } map { split(qr/,/, $_) } @runscripts;
+my @MODULES     = map { chomp; $_ } map { split(qr/,/, $_) } (@modules    ? @modules    : @default_modules);
+my @CPANMIRRORS = map { chomp; $_ } map { split(qr/,/, $_) } (@mirrors    ? @mirrors    : @default_mirrors);
+my @RUNSCRIPTS  = map { chomp; $_ } map { split(qr/,/, $_) } (@runscripts ? @runscripts : @default_runscripts);
+my @RUNARGS     = map { chomp; $_ } map { split(qr/;/, $_) } (@runargs    ? @runargs    : @default_runargs);
 my @EXESUFFIXES = sort map { chomp; $_ } map { split(qr/,/, $_) } @exesuffixes;
 my $CONFARGS    = join " ", map { chomp; $_ } @confargs; # repeatable, but no comma-separate
 
@@ -491,7 +491,7 @@ print "  PREFIX:         $PREFIX\n\n";
 print "  configureargs:  ".join("\n                  ", @confargs)."\n\n";
 print "  CPAN mirrors:   ".join("\n                  ", @CPANMIRRORS)."\n\n";
 print "  modules:        ".join("\n                  ", @MODULES)."\n\n";
-print "  scripts:        ".join("\n                  ", map { $_ ." ".join(" ", @runargs) } @RUNSCRIPTS)."\n\n";
+print "  scripts:        ".join("\n                  ", map { $_ ." ".join(" ", @RUNARGS) } @RUNSCRIPTS)."\n\n";
 print "============================================================\n\n";
 
 if ($blead and $perl_version % 2 == 0) {
