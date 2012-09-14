@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - simplify path prefix back
 
 0.06      2012-09-14
         - allow to override defaults from --perlformance
