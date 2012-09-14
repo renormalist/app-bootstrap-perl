@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.06      2012-09-14
         - allow to override defaults from --perlformance
         - do not throw away versions built with --blead
 
