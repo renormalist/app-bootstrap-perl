@@ -21,7 +21,7 @@ Install a threaded 64bit Perl using current "blead"
 from git with CPAN config into a path like
 C</opt/perl-5.15-thread-64bit-v5.15.5-258-ge7d0a3f>:
 
-  $ bootstrap-perl
+  $ bootstrap-perl [ <OPTIONS> ]
 
 =head2 Specify git revisions
 
@@ -125,6 +125,10 @@ development line besides the yearly segmented graphs.
 It is only possible to use C<--blead> with development versions in
 order to create consistent results from only the blead branch.
 
+Note that C<--blead> does not set a version but only modifies the
+formats of path prefix and how the version is reported to
+Perl::Formance; it is B<not> the same as C<--version blead>.
+
 =head3 configure CPAN and modules
 
 Configure CPAN to use these mirrors:
@@ -148,10 +152,12 @@ Install these modules from CPAN:
 Run these scripts relative to built <PREFIX>/bin/:
 
   $ bootstrap-perl --run tapper-testsuite-benchmark-perlformance
-  $ bootstrap-perl --run tapper-testsuite-benchmark-perlformance --runargs="--plugins=ALL"
+  $ bootstrap-perl --run tapper-testsuite-benchmark-perlformance --runargs="--plugins=Fib,FibOO;-vvv"
   $ bootstrap-perl -r tapper-testsuite-benchmark-perlformance -r primes.pl
 
-(Option can be repeated and allow comma separated lists.)
+(Option C<--run> can be repeated and allows comma separated lists.)
+
+(Option C<--runargs> can be repeated and allows semicolon[sic] separated lists.)
 
 =head3 run Perl::Formance benchmarks
 
@@ -160,8 +166,13 @@ Benchmark::Perl::Formance do:
 
   $ bootstrap-perl --perlformance
 
-This is a shortcut for C<-M Digest::SHA1,DB_File,Mail::DKIM,IP::Country,Net::Ident,IO::Socket::INET6,Encode::Detect,Benchmark::Perl::Formance,Task::PerlFormance,Tapper::TestSuite::Benchmark::Perl::Formance> C<-m http://perlformance.net/CPAN/> C<--run benchmark-perlformance> C<--runargs=--plugins=ALL>.
+This sets defaults equivalent to for C<-M Digest::SHA1,DB_File,Mail::DKIM,IP::Country,Net::Ident,IO::Socket::INET6,Encode::Detect,Benchmark::Perl::Formance,Task::PerlFormance,Tapper::TestSuite::Benchmark::Perl::Formance> C<-m http://perlformance.net/PINTO/perlformance/> C<--run benchmark-perlformance> C<--runargs=--plugins=ALL>.
 
+You can override parts of that like this:
+
+  $ bootstrap-perl --perlformance --runargs="--plugins=Fib,FibOO"
+
+to specify different set ob benchmarks.
 
 =head2 Unified installation prefix schema
 
