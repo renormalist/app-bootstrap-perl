@@ -322,8 +322,10 @@ my $ok = GetOptions (
                     );
 
 if ($help) {
-        print "\nPlease see 'perldoc bootstrap-perl' for help.\n";
-        exit 0;
+        exec("perldoc", "bootstrap-perl") or do {
+                print "\nPlease see 'perldoc bootstrap-perl' for help.\n";
+                exit 0;
+        }
 }
 
 print "\n";
