@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.07      2012-09-14
         - simplify path prefix back
 
 0.06      2012-09-14
