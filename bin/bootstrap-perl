@@ -265,7 +265,7 @@ sub print_and_qx {
 }
 
 sub _perl_base_name {
-        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, $exe_suffixes, $blead) = @_;
+        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitdescribe, $gitchangeset, $exe_suffixes, $blead) = @_;
         return join("-",
                     ($blead      ? "blead" : "$perl_revision.$perl_version"),
                     ($usethreads ? "" : "no" )."thread",
@@ -275,7 +275,7 @@ sub _perl_base_name {
 }
 
 sub _perl_exe_name {
-        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, $exe_suffixes, $blead) = @_;
+        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitdescribe, $gitchangeset, $exe_suffixes, $blead) = @_;
 
         return join("-",
                     "perl",
@@ -284,12 +284,12 @@ sub _perl_exe_name {
 }
 
 sub _perl_pathprefix {
-        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitversion, $exe_suffixes, $blead) = @_;
+        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitdescribe, $gitchangeset, $exe_suffixes, $blead) = @_;
 
         return join("-",
                     $prefixbase."/perl",
                     _perl_base_name(@_),
-                    ($blead ? () : $gitversion),
+                    ($blead ? $gitchangeset : $gitdescribe),
                    );
 }
 
@@ -474,8 +474,8 @@ unless (defined $perl_revision && defined $perl_version)
         exit 1;
 }
 
-my $codespeed_executable =            _perl_exe_name  ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitdescribe, \@EXESUFFIXES, $blead);
-my $PREFIX               = $prefix || _perl_pathprefix($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitdescribe, \@EXESUFFIXES, $blead);
+my $codespeed_executable =            _perl_exe_name  ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitdescribe, $gitchangeset, \@EXESUFFIXES, $blead);
+my $PREFIX               = $prefix || _perl_pathprefix($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitdescribe, $gitchangeset, \@EXESUFFIXES, $blead);
 my $USETHREADS           = $usethreads ? "-Dusethreads"  : "";
 my $BIT64                = $bit64      ? "-Duse64bitall" : "";
 
@@ -521,15 +521,10 @@ if ( -e $perl_gitchangeset ) {
         chomp $existing_version;
 }
 
-if ( ! -e $perl_codespeed or
-     ( $blead and $existing_version ne $gitchangeset ) )
+if ( ! -e $perl_codespeed )
 {
         print "*** BUILD perl\n";
         # ========== configure ==========
-
-        if ($blead and -d $PREFIX) {
-                print_and_system "rm -f '$PREFIX'";
-        }
 
         print_and_system "cd $build_path_perl; sh Configure -de -Dusedevel $USETHREADS $BIT64 $CONFARGS -Dprefix=$PREFIX";
 
