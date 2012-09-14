@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - allow to override defaults from --perlformance
+        - do not throw away versions built with --blead
 
 0.05      2012-09-04
         - use Pinto-based mirror for --perlformance(-report)
