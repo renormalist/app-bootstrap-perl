@@ -507,14 +507,14 @@ print "  modules:        ".join("\n                  ", @MODULES)."\n\n";
 print "  scripts:        ".join("\n                  ", map { $_ ." ".join(" ", @RUNARGS) } @RUNSCRIPTS)."\n\n";
 print "============================================================\n\n";
 
-if ($blead and $perl_version % 2 == 0) {
+my @in_blead = grep { / blead$/ }
+               map  { chomp ; $_ }
+               print_and_qx qq!git branch --contains $gitchangeset!;
+if ($blead && !@in_blead) {
         print "# Bummer!\n";
-        print "#   You should use '--blead' only with Perl development versions,\n";
-        print "#   i.e., odd numbers 5.11.x, 5.13.x, 5.15.x, 5.17.x, ...\n";
-        print "#   but you chose: $perl_revision.$perl_version.$perl_subversion\n";
+        print "#   Use '--blead' only with commits in blead branch.\n";
         exit 1;
 }
-
 $ENV{PERL_AUTOINSTALL} = "--defaultdeps";
 $ENV{TEST_JOBS}        = $threadcount;
 $ENV{TWMC_TEST_PORT}   = "9876";
