@@ -186,7 +186,9 @@ Benchmark::Perl::Formance do:
 
   $ bootstrap-perl --perlformance
 
-This sets defaults equivalent to for C<-M Digest::SHA1,DB_File,Mail::DKIM,IP::Country,Net::Ident,IO::Socket::INET6,Encode::Detect,Benchmark::Perl::Formance,Task::PerlFormance,Tapper::TestSuite::Benchmark::Perl::Formance> C<-m http://perlformance.net/PINTO/perlformance/> C<--run benchmark-perlformance> C<--runargs=--plugins=ALL>.
+This sets defaults equivalent to C<-M Task::PerlFormance> C<-m
+http://perlformance.net/PINTO/perlformance/> C<--run
+benchmark-perlformance> C<--runargs=--plugins=ALL>.
 
 You can override parts of that like this:
 
@@ -407,20 +409,8 @@ if ($perlformance_local) {
         @default_runargs    = ("--plugins=Fib,FibOO,DPath,Mem,Rx,Shootout::fasta,Shootout::binarytrees,Shootout::nbody,Shootout::spectralnorm");
 }
 if ($perlformance or $perlformance_report) {
-        @default_modules = qw( Digest::SHA1
-                               DB_File
-                               Safe
-                               Module::Build
-                               Mail::DKIM
-                               IP::Country
-                               Net::Ident
-                               IO::Socket::INET6
-                               Encode::Detect
-                               Benchmark::Perl::Formance
-                               Tapper::TestSuite::Benchmark::Perl::Formance
-                               Task::PerlFormance
-                            );
-        @default_mirrors = qw(http://perlformance.net/PINTO/perlformance/);
+        @default_modules    = qw(Task::PerlFormance);
+        @default_mirrors    = qw(http://perlformance.net/PINTO/perlformance/);
         @default_runscripts = qw(benchmark-perlformance);
         @default_runargs    = qw(--plugins=ALL);
 }
