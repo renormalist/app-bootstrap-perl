@@ -737,7 +737,7 @@ if ($cpan)
         #         print_and_system qq!$bin_cpan -j $CFG -f -i Devel::Size!;
         # }
         print_and_system qq{if ! $PERL -M"version 0.97" -e1 ; then $bin_cpan -j $CFG -f -i version ; fi };
-        print_and_system qq!$bin_cpan -j $CFG    -i CPAN::SQLite!;
+        #print_and_system qq!$bin_cpan -j $CFG    -i CPAN::SQLite!;
         print_and_system qq!$bin_cpan -j $CFG    -i YAML::Syck!;
         print_and_system qq!$bin_cpan -j $CFG    -i IO::Tty!;
         print_and_system qq!$bin_cpan -j $CFG    -i Expect!;
