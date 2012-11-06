@@ -568,12 +568,6 @@ my $DRY = $dry ? "-n" : "";
 
 # ========== build ==========
 
-my $existing_version = "";
-if ( -e $perl_gitchangeset ) {
-        $existing_version = qx($perl_gitchangeset);
-        chomp $existing_version;
-}
-
 if ( ! -e $perl_codespeed )
 {
         print "*** BUILD perl\n";
