@@ -756,7 +756,7 @@ if ($cpan)
 
 # Run scripts from inside the just installed Perl
 foreach my $runscript (@RUNSCRIPTS) {
-        print_and_system qq!$PREFIX/bin/$runscript !.join(" ", @runargs);
+        print_and_system qq!$PREFIX/bin/$runscript !.join(" ", @RUNARGS);
 }
 # print_and_system qq!$PREFIX/bin/tapper-testsuite-benchmark-perlformance!;
 
