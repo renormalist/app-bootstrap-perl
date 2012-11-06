@@ -32,7 +32,6 @@ C</opt/perl-5.15-thread-64bit-v5.15.5-258-ge7d0a3f>:
 =head3 tag
 
   # note the different tag forms before and after Perl 5.10
-
   $ bootstrap-perl --version perl-5.8.7
   $ bootstrap-perl --version v5.14.1
 
@@ -415,6 +414,7 @@ sub installdeps_debian
                                 linux-source
                                 libgmp3-dev
                                 libssl-dev
+                                libpcre3-dev
                               ));
         foreach my $dep (@DEPENDECIES) {
                 print_and_system "$APTGET install $dep\n";
