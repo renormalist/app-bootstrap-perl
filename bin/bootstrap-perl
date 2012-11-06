@@ -707,13 +707,13 @@ if ($cpan)
                                        INGY/YAML-0.78.tar.gz
                                        INGY/YAML-0.77.tar.gz
                                        INGY/YAML-0.76.tar.gz)],
-                         "Devel::Size" => [qw(NWCLARK/Devel-Size-0.78.tar.gz
-                                              NWCLARK/Devel-Size-0.77.tar.gz
-                                              NWCLARK/Devel-Size-0.76.tar.gz
-                                              NWCLARK/Devel-Size-0.75.tar.gz
-                                              BROWSERUK/Devel-Size-0.72.tar.gz
-                                              TELS/devel/Devel-Size-0.71.tar.gz
-                                              TELS/devel/Devel-Size-0.70.tar.gz)],
+                         # "Devel::Size" => [qw(NWCLARK/Devel-Size-0.78.tar.gz
+                         #                      NWCLARK/Devel-Size-0.77.tar.gz
+                         #                      NWCLARK/Devel-Size-0.76.tar.gz
+                         #                      NWCLARK/Devel-Size-0.75.tar.gz
+                         #                      BROWSERUK/Devel-Size-0.72.tar.gz
+                         #                      TELS/devel/Devel-Size-0.71.tar.gz
+                         #                      TELS/devel/Devel-Size-0.70.tar.gz)],
                          );
 
         foreach my $mod (keys %mod_dists) {
@@ -732,10 +732,10 @@ if ($cpan)
                 # ignore known hanging tests with utf8
                 print_and_system qq! echo "notest install Test::Simple" | $bin_cpan -j $CFG!;
         }
-        if ($gitdescribe =~ /perl-5\.15\./) {
-                # ignore known failing tests
-                print_and_system qq!$bin_cpan -j $CFG -f -i Devel::Size!;
-        }
+        # if ($gitdescribe =~ /perl-5\.15\./) {
+        #         # ignore known failing tests
+        #         print_and_system qq!$bin_cpan -j $CFG -f -i Devel::Size!;
+        # }
         print_and_system qq{if ! $PERL -M"version 0.97" -e1 ; then $bin_cpan -j $CFG -f -i version ; fi };
         print_and_system qq!$bin_cpan -j $CFG    -i CPAN::SQLite!;
         print_and_system qq!$bin_cpan -j $CFG    -i YAML::Syck!;
