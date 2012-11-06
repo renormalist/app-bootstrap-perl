@@ -48,7 +48,26 @@ C</opt/perl-5.15-thread-64bit-v5.15.5-258-ge7d0a3f>:
   $ bootstrap-perl --version c14f2f9db08de3f50fe2ff7438429153d6ceb9a5
   $ bootstrap-perl --version c14f2f9db08de3f50fe2ff7438429153d6ceb9a5^
 
+=head3 current HEAD in local git repo
+
+A leading C<.> is replaced with HEAD's commitid in current subdir; you
+can still combine that like usual git revisions:
+
+  $ bootstrap-perl --version .
+  $ bootstrap-perl --version .^
+  $ bootstrap-perl --version .~5
+
+
 =head2 Installation options
+
+=head3 specify giturl
+
+  $ bootstrap-perl --giturl git://github.com/mirrors/perl.git
+  $ bootstrap-perl -g git://github.com/mirrors/perl.git # same
+  $ bootstrap-perl -g .                                 # local dir
+
+The giturl is always cloned from the specified giturl to a temporary
+working directory, so your local subdir stays untouched.
 
 =head3 install directory
 
@@ -173,6 +192,14 @@ You can override parts of that like this:
 
 to specify different set ob benchmarks.
 
+To use current subdir as Perl's repo and run only
+those benchmarks with no extra dependencies
+
+  $ bootstrap-perl --perlformance-local
+  $ bootstrap-perl --perlformance-local -c .
+  $ bootstrap-perl --perlformance-local -c .^
+  $ bootstrap-perl --perlformance-local -c .~5
+
 =head2 Unified installation prefix schema
 
 It uses a unified naming schema for it's installation PREFIX:
@@ -215,6 +242,7 @@ use strict;
 use warnings;
 
 use Getopt::Long ":config", "no_ignore_case", "bundling";
+use Cwd "getcwd";
 
 my $HOME                = $ENV{HOME};
 
@@ -240,6 +268,7 @@ my $test                = 0;
 my $cpan                = 1;
 my $forcecpancfg        = 1;
 my $perlformance        = 0;
+my $perlformance_local  = 0;
 my $perlformance_report = 0;
 my $jobs                = $threadcount;
 my @mirrors;
@@ -248,6 +277,8 @@ my @runscripts          = ();
 my @runargs             = ();
 my @confargs            = ();
 my @exesuffixes         = ();
+my $OLDSTDOUT           = *STDOUT;
+my $OLDSTDERR           = *STDERR;
 
 my $DISTROPREFSREPO     = "git://github.com/renormalist/cpanpm-distroprefs.git";
 my $DISTROPREFSSRCBASE  = "$build_path";
@@ -272,6 +303,12 @@ sub print_and_qx {
         my ($cmd) = @_;
         print $cmd."\n";
         qx($cmd);
+}
+
+sub print_and_qx_chomp {
+        my $out = print_and_qx @_;
+        chomp $out;
+        $out;
 }
 
 sub _perl_base_name {
@@ -308,7 +345,7 @@ sub _perl_pathprefix {
 my $ok = GetOptions (
                      "prefix=s"     => \$prefix,
                      "prefixbase=s" => \$prefixbase,
-                     "version=s"    => \$version,
+                     "version|commit|c=s" => \$version,
                      "installdeps=s" => \$installdeps,
                      "sourcetgz=s"  => \$sourcetgz,
                      "blead!"       => \$blead,
@@ -320,6 +357,7 @@ my $ok = GetOptions (
                      "cpan!"        => \$cpan,
                      "forcecpancfg!" => \$forcecpancfg,
                      'perlformance' => \$perlformance,
+                     'perlformance-local' => \$perlformance_local,
                      'perlformance-report' => \$perlformance_report,
                      'dry|n'        => \$dry,
                      'mirror|m=s@'  => \@mirrors,
@@ -328,7 +366,7 @@ my $ok = GetOptions (
                      'runargs=s@'   => \@runargs,
                      'confargs=s@'  => \@confargs,
                      'exesuffixes=s@' => \@exesuffixes,
-                     'giturl=s'     => \$giturl,
+                     'giturl|g=s'   => \$giturl,
                     );
 
 if ($help) {
@@ -343,23 +381,29 @@ print "============================================================\n";
 print "Bootstrap Perl\n";
 print "============================================================\n";
 
-# --perlformance is a shortcut for
-#   -M Digest::SHA1,\
-#      DB_File,\
-#      Mail::DKIM,\
-#      IP::Country,\
-#      Net::Ident,\
-#      IO::Socket::INET6,\
-#      Encode::Detect,\
-#      Benchmark::Perl::Formance,Task::PerlFormance, \
-#      Tapper::TestSuite::Benchmark::Perl::Formance \
-#   -m http://perlformance.net/CPAN/ \
-#   --run benchmark-perlformance \
-#   --runargs=--plugins=ALL
-#                       RGARCIA/Safe-2.29.tar.gz
-#                       RGARCIA/Safe-2.30.tar.gz
-#                       RGARCIA/Safe-2.32.tar.gz
-#                       RGARCIA/Safe-2.33.tar.gz
+# giturl "." means clone from local dir
+if ($giturl eq '.') {
+        $giturl = getcwd;
+        my $firstcommit = qx!git log --oneline 8d063cd8450e59ea1c611a2f4f5a21059a2804f1 2> /dev/null!;
+        if ($firstcommit !~ /a "replacement" for awk and sed/) {
+                print "Local git repo does not look like it is Perl's.\n";
+                exit 1;
+        }
+}
+
+# version "." is replaced with current repo's HEAD
+if ($version =~ /^\./) {
+        my $rev = print_and_qx_chomp qq!git rev-parse HEAD!;
+        $version =~ s/^\./$rev/ if $rev;
+}
+
+if ($perlformance_local) {
+        $giturl             = ".";
+        @default_modules    = qw(Benchmark::Perl::Formance);
+        @default_mirrors    = qw(http://perlformance.net/PINTO/perlformance/);
+        @default_runscripts = qw(benchmark-perlformance);
+        @default_runargs    = ("--plugins=Fib,FibOO,DPath,Mem,Rx,Shootout::fasta,Shootout::binarytrees,Shootout::nbody,Shootout::spectralnorm");
+}
 if ($perlformance or $perlformance_report) {
         @default_modules = qw( Digest::SHA1
                                DB_File
@@ -437,12 +481,15 @@ if ($installdeps) {
 
 print_and_system "mkdir -p $build_path";
 
-if ( not $build_path_perl && -e $build_path_perl ) {
-        if (-e $sourcetgz)
-        {
+if (-d "$build_path_perl/.git") {
+        print_and_system "cd $build_path_perl && git config remote.origin.url $giturl";
+}
+else
+{
+        if (-e $sourcetgz) {
                 print_and_system "cd $build_path && tar xzf $sourcetgz";
         } else {
-                print_and_system "cd $build_path && git clone $giturl";
+                print_and_system "cd $build_path && git clone $giturl perl";
         }
 }
 
