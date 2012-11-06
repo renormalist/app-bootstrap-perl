@@ -252,6 +252,7 @@ my $HOME                = $ENV{HOME};
 
 my $build_path          = "/tmp/bootstrap-perl-build";
 my $build_path_perl     = "$build_path/perl";
+my $logfile             = "$build_path/bootstrap-perl.log";
 my $giturl              = "git://github.com/mirrors/perl.git";
 
 my $cpucount             = `cat /proc/cpuinfo | grep bogomips | wc -l`; chomp $cpucount;
@@ -510,10 +511,10 @@ if ($version =~ /(v|perl-)?5\.8\./ or $version =~ /(v|perl-)?5\.9\.[01234]/) {
 # ========== prepare paths ==========
 
 my $gitdescribe;
-$gitdescribe = print_and_qx qq!cd $build_path_perl && git describe --all!;
-$gitdescribe = print_and_qx qq!cd $build_path_perl && git describe! if ($gitdescribe =~ m,/, && $gitdescribe !~ m,tags/,);
-chomp $gitdescribe; $gitdescribe =~ s|^tags/||g;
-my $gitchangeset = print_and_qx qq!cd $build_path_perl && git rev-parse HEAD!; chomp $gitchangeset;
+$gitdescribe = print_and_qx_chomp qq!cd $build_path_perl && git describe --all!;
+$gitdescribe = print_and_qx_chomp qq!cd $build_path_perl && git describe! if ($gitdescribe =~ m,/, && $gitdescribe !~ m,tags/,);
+$gitdescribe =~ s|^tags/||g;
+my $gitchangeset = print_and_qx_chomp qq!cd $build_path_perl && git rev-parse HEAD!;
 my ($perl_revision, $perl_version, $perl_subversion) = $gitdescribe =~ m/^\D*(\d+)[._](\d+)(?:[._](\d+))?.*$/g;
 $perl_version    = sprintf("%02d", $perl_version);
 $perl_subversion ||= 0;
@@ -587,8 +588,7 @@ if ( ! -e $perl_codespeed )
 
         if ($test)
         {
-                my $api_version = `cd $build_path_perl; . ./config.sh && echo \$api_version`;
-                chomp $api_version;
+                my $api_version = print_and_qx_chomp qq!cd $build_path_perl; . ./config.sh && echo \$api_version!;
 
                 my $TEST = $api_version >= 11 ? "test_harness" : "test"; # only Perl 5.11+
                 my $TEST_JOBS = $jobs ? "TEST_JOBS=$jobs" : "TEST_JOBS=$threadcount";
@@ -629,10 +629,10 @@ if (open my $PERLCODESPEED, ">", $perl_codespeed)
 }
 
 # binaries
-my $CPAN     = print_and_qx qq!ls -drt1 $PREFIX/bin/cpan5.*.*     | tail -1!; chomp $CPAN;
-my $PERL     = print_and_qx qq!ls -drt1 $PREFIX/bin/perl5.*.*     | tail -1!; chomp $PERL;
-my $PERLDOC  = print_and_qx qq!ls -drt1 $PREFIX/bin/perldoc5.*.*  | tail -1!; chomp $PERLDOC;
-my $POD2TEXT = print_and_qx qq!ls -drt1 $PREFIX/bin/pod2text5.*.* | tail -1!; chomp $POD2TEXT;
+my $CPAN     = print_and_qx_chomp qq!ls -drt1 $PREFIX/bin/cpan5.*.*     | tail -1!;
+my $PERL     = print_and_qx_chomp qq!ls -drt1 $PREFIX/bin/perl5.*.*     | tail -1!;
+my $PERLDOC  = print_and_qx_chomp qq!ls -drt1 $PREFIX/bin/perldoc5.*.*  | tail -1!;
+my $POD2TEXT = print_and_qx_chomp qq!ls -drt1 $PREFIX/bin/pod2text5.*.* | tail -1!;
 
 print "# CPAN:     $CPAN\n";
 print "# PERL:     $PERL\n";
@@ -666,7 +666,7 @@ if ($cpan)
         print_and_system qq!rsync -r $DISTROPREFSSRC2/ $DISTROPREFSDIR/!;
 
         # Configure CPAN initially
-        my $CFG = print_and_qx qq!$PERLDOC -l CPAN | sed -e "s/CPAN\.pm/CPAN\\/Config.pm/"!; chomp $CFG;
+        my $CFG = print_and_qx_chomp qq!$PERLDOC -l CPAN | sed -e "s/CPAN\.pm/CPAN\\/Config.pm/"!;
 
         if ($forcecpancfg or ! -e $CFG) {
                 my $CPANCFG = do { local $/; <DATA> };
