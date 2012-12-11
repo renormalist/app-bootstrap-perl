@@ -271,6 +271,7 @@ my $bit64               = 1;
 my $help                = 0;
 my $test                = 0;
 my $cpan                = 1;
+my $cleancpansources    = 0;
 my $forcecpancfg        = 1;
 my $perlformance        = 0;
 my $perlformance_local  = 0;
@@ -289,8 +290,8 @@ my $DISTROPREFSREPO     = "git://github.com/renormalist/cpanpm-distroprefs.git";
 my $DISTROPREFSSRCBASE  = "$build_path";
 my $DISTROPREFSSRC1     = "$DISTROPREFSSRCBASE/cpanpm-distroprefs/cpanpm/distroprefs";
 my $DISTROPREFSSRC2     = "$DISTROPREFSSRCBASE/cpanpm-distroprefs/renormalist/distroprefs";
-my $DISTROPREFSURL      = 'http://cpansearch.perl.org/src/ANDK/CPAN-1.9800/distroprefs/';
-my $DISTROPREFSDIR      = $prefixbase."/cpan/prefs"; # TODO: CPAN-Config is hardwired, not yet aware of $prefixbase!
+my $DISTROPREFSDIR      = $prefixbase."/cpan/prefs";
+my $SOURCESDIR          = $prefixbase."/cpan/sources";
 
 # defaults
 my @default_runscripts = ();
@@ -360,6 +361,7 @@ my $ok = GetOptions (
                      "jobs|j=i"     => \$jobs,
                      "test|t"       => \$test,
                      "cpan!"        => \$cpan,
+                     "cleancpansources!" => \$cleancpansources,
                      "forcecpancfg!" => \$forcecpancfg,
                      'perlformance' => \$perlformance,
                      'perlformance-local' => \$perlformance_local,
@@ -682,6 +684,13 @@ if ($cpan)
                         print "Remove stale CPAN.pm lock.\n";
                         print_and_system qq!rm -f $cpanlock!;
                 }
+        }
+
+        # optionally remove sources cache to avoid conflicts,
+        # like happening with hot-patched CPAN mirrors (via Pinto)
+        if ($cleancpansources) {
+                print "Remove $SOURCESDIR.\n";
+                print_and_system qq!rm -fr '$SOURCESDIR'!;
         }
 
         # force a CPAN.pm with all features we need, assume old-school CPAN.pm
