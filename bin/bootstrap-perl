@@ -667,8 +667,9 @@ if ($cpan)
         if ($forcecpancfg or ! -e $CFG) {
                 my $CPANCFG = do { local $/; <DATA> };
                 my $MIRRORSLIST = join(" ", @CPANMIRRORS);
-                $CPANCFG =~ s/__DISTROPREFSDIR__/$DISTROPREFSDIR/;
-                $CPANCFG =~ s/__MIRRORS__/$MIRRORSLIST/;
+                $CPANCFG =~ s/__DISTROPREFSDIR__/$DISTROPREFSDIR/g;
+                $CPANCFG =~ s/__MIRRORS__/$MIRRORSLIST/g;
+                $CPANCFG =~ s/__PREFIXBASE__/$prefixbase/g;
                 open CPANCFG, ">", $CFG or die "Can not create $CFG";
                 print CPANCFG $CPANCFG;
                 close CPANCFG;
@@ -780,7 +781,7 @@ $CPAN::Config = {
   'applypatch' => q[/usr/bin/applypatch],
   'auto_commit' => q[1],
   'build_cache' => q[10],
-  'build_dir' => q[/opt/cpan/build],
+  'build_dir' => q[__PREFIXBASE__/cpan/build],
   'build_dir_reuse' => q[0],
   'build_requires_install_policy' => q[yes],
   'bzip2' => q[/bin/bzip2],
@@ -792,7 +793,7 @@ $CPAN::Config = {
   'colorize_warn' => q[bold red],
   'commandnumber_in_prompt' => q[0],
   'connect_to_internet_ok' => q[0],
-  'cpan_home' => q[/opt/cpan],
+  'cpan_home' => q[__PREFIXBASE__/cpan],
   'dontload_hash' => {  },
   'ftp' => q[/usr/bin/ftp],
   'patch' => q[/usr/bin/patch],
@@ -802,13 +803,13 @@ $CPAN::Config = {
   'gpg' => q[/usr/bin/gpg],
   'gzip' => q[/bin/gzip],
   'halt_on_failure' => q[0],
-  'histfile' => q[/opt/cpan/histfile],
+  'histfile' => q[__PREFIXBASE__/cpan/histfile],
   'histsize' => q[100],
   'http_proxy' => q[],
   'inactivity_timeout' => q[0],
   'index_expire' => q[0],
   'inhibit_startup_message' => q[0],
-  'keep_source_where' => q[/opt/cpan/sources],
+  'keep_source_where' => q[__PREFIXBASE__/cpan/sources],
   'load_module_verbosity' => q[v],
   'lynx' => q[],
   'make' => q[/usr/bin/make],
