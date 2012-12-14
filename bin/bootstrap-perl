@@ -753,6 +753,7 @@ if ($cpan)
         print_and_system qq!$bin_cpan -j $CFG    -i Expect!;
         print_and_system qq!$bin_cpan -j $CFG    -i Bundle::CPAN!;
         print_and_system qq!$bin_cpan -j $CFG    -i LWP!;
+        print_and_system qq!$bin_cpan -j $CFG    -i AAAA::Mail::SpamAssassin! if $perlformance || $perlformance_report;
 
         # install modules from CPAN
         foreach my $module (@MODULES) {
