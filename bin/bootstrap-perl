@@ -286,19 +286,6 @@ my @exesuffixes         = ();
 my $OLDSTDOUT           = *STDOUT;
 my $OLDSTDERR           = *STDERR;
 
-my $DISTROPREFSREPO     = "git://github.com/renormalist/cpanpm-distroprefs.git";
-my $DISTROPREFSSRCBASE  = "$build_path";
-my $DISTROPREFSSRC1     = "$DISTROPREFSSRCBASE/cpanpm-distroprefs/cpanpm/distroprefs";
-my $DISTROPREFSSRC2     = "$DISTROPREFSSRCBASE/cpanpm-distroprefs/renormalist/distroprefs";
-my $DISTROPREFSDIR      = $prefixbase."/cpan/prefs";
-my $SOURCESDIR          = $prefixbase."/cpan/sources";
-
-# defaults
-my @default_runscripts = ();
-my @default_runargs    = ();
-my @default_modules    = ();
-my @default_mirrors    = (qw( http://rub.de/ftp/pub/CPAN/ ));
-
 sub print_and_system {
         my ($cmd) = @_;
         print $cmd."\n";
@@ -382,6 +369,19 @@ if ($help) {
                 exit 0;
         }
 }
+
+my $DISTROPREFSREPO     = "git://github.com/renormalist/cpanpm-distroprefs.git";
+my $DISTROPREFSSRCBASE  = "$build_path";
+my $DISTROPREFSSRC1     = "$DISTROPREFSSRCBASE/cpanpm-distroprefs/cpanpm/distroprefs";
+my $DISTROPREFSSRC2     = "$DISTROPREFSSRCBASE/cpanpm-distroprefs/renormalist/distroprefs";
+my $DISTROPREFSDIR      = $prefixbase."/cpan/prefs";
+my $SOURCESDIR          = $prefixbase."/cpan/sources";
+
+# defaults
+my @default_runscripts = ();
+my @default_runargs    = ();
+my @default_modules    = ();
+my @default_mirrors    = (qw( http://rub.de/ftp/pub/CPAN/ ));
 
 print "\n";
 print "============================================================\n";
