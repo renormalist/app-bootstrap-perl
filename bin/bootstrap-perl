@@ -377,6 +377,7 @@ my $DISTROPREFSSRC1     = "$DISTROPREFSSRCBASE/cpanpm-distroprefs/cpanpm/distrop
 my $DISTROPREFSSRC2     = "$DISTROPREFSSRCBASE/cpanpm-distroprefs/renormalist/distroprefs";
 my $DISTROPREFSDIR      = $prefixbase."/cpan/prefs";
 my $SOURCESDIR          = $prefixbase."/cpan/sources";
+my $CPANBUILDDIR        = $prefixbase."/cpan/build";
 
 # defaults
 my @default_runscripts = ();
@@ -661,6 +662,9 @@ if ($cpan)
         print_and_system qq!mkdir -p $DISTROPREFSDIR!;
         print_and_system qq!rsync -r $DISTROPREFSSRC1/ $DISTROPREFSDIR/!;
         print_and_system qq!rsync -r $DISTROPREFSSRC2/ $DISTROPREFSDIR/!;
+
+        # Cleanup build dir
+        print_and_system qq!rm -fr $CPANBUILDDIR!;
 
         # Configure CPAN initially
         my $CFG = print_and_qx_chomp qq!$PERLDOC -l CPAN | sed -e "s/CPAN\.pm/CPAN\\/Config.pm/"!;
