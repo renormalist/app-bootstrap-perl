@@ -383,7 +383,7 @@ my $CPANBUILDDIR        = $prefixbase."/cpan/build";
 my @default_runscripts = ();
 my @default_runargs    = ();
 my @default_modules    = ();
-my @default_mirrors    = (qw( http://rub.de/ftp/pub/CPAN/ ));
+my @default_mirrors    = (qw( http://search.cpan.org/CPAN/ ));
 
 print "\n";
 print "============================================================\n";
