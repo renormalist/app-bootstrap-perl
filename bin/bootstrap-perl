@@ -423,6 +423,7 @@ if ($perlformance or $perlformance_report) {
 if ($perlformance_report) {
         @default_runscripts = qw(tapper-testsuite-benchmark-perlformance);
         @default_runargs    = qw(--plugins=ALL);
+        @default_runargs    = ("-Doptimize='-O2 -falign-loops=8 -falign-jumps=8 -falign-functions=64 -falign-labels=8 -mpreferred-stack-boundary=8 -minline-all-stringops'");
 }
 
 # modules/mirros/runscripts can be comma-separated
