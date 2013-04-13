@@ -381,6 +381,7 @@ my $CPANBUILDDIR        = $prefixbase."/cpan/build";
 
 # defaults
 my @default_runscripts = ();
+my @default_confargs   = ();
 my @default_runargs    = ();
 my @default_modules    = ();
 my @default_mirrors    = (qw( http://search.cpan.org/CPAN/ ));
@@ -430,7 +431,7 @@ my @CPANMIRRORS = map { chomp; $_ } map { split(qr/,/, $_) } (@mirrors    ? @mir
 my @RUNSCRIPTS  = map { chomp; $_ } map { split(qr/,/, $_) } (@runscripts ? @runscripts : @default_runscripts);
 my @RUNARGS     = map { chomp; $_ } map { split(qr/;/, $_) } (@runargs    ? @runargs    : @default_runargs);
 my @EXESUFFIXES = sort map { chomp; $_ } map { split(qr/,/, $_) } @exesuffixes;
-my $CONFARGS    = join " ", map { chomp; $_ } @confargs; # repeatable, but no comma-separate
+my $CONFARGS    = join " ", map { chomp; $_ } (@confargs ? @confargs : @default_confargs); # repeatable, but no comma-separate
 
 # ========== build dependencies ==========
 
