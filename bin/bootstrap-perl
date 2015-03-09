@@ -254,7 +254,7 @@ my $HOME                = $ENV{HOME};
 my $build_path          = "/tmp/bootstrap-perl-build";
 my $build_path_perl     = "$build_path/perl";
 my $logfile             = "$build_path/bootstrap-perl.log";
-my $giturl              = "git://github.com/mirrors/perl.git";
+my $giturl              = "git://github.com/Perl/perl5.git";
 
 my $cpucount             = `cat /proc/cpuinfo | grep bogomips | wc -l`; chomp $cpucount;
 my $threadcount          = $cpucount + 1;
