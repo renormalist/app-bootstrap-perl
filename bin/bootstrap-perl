@@ -496,7 +496,7 @@ if ($installdeps) {
 
 # ========== prepare ==========
 
-print_and_system "mkdir -p $build_path";
+system("mkdir -p $build_path") == 0 || die;
 setup_log();
 
 if (-d "$build_path_perl/.git") {
