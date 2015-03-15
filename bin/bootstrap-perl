@@ -284,8 +284,8 @@ my @runscripts          = ();
 my @runargs             = ();
 my @confargs            = ();
 my @exesuffixes         = ();
-my $OLDSTDOUT           = *STDOUT;
-my $OLDSTDERR           = *STDERR;
+my $OLDSTDOUT;
+my $OLDSTDERR;
 
 sub print_and_system {
         my ($cmd) = @_;
