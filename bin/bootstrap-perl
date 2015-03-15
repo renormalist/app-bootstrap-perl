@@ -296,8 +296,19 @@ sub setup_log {
 
 sub print_and_system {
         my ($cmd) = @_;
+        my $exitcode;
+        my (undef, undef, $line) = caller;
+
+        open(STDOUT, ">&", $LOGFILE) || die;
+        open(STDERR, ">&", $LOGFILE) || die;
+
         print $cmd."\n";
-        system ($cmd);
+        $exitcode = system ($cmd);
+
+        open(STDOUT, ">&", $OLDSTDOUT) || die;
+        open(STDERR, ">&", $OLDSTDERR) || die;
+
+        $exitcode == 0 || die "$0($line): $cmd ($exitcode>>".($exitcode>>8).")";
 }
 
 sub print_and_qx {
