@@ -286,6 +286,13 @@ my @confargs            = ();
 my @exesuffixes         = ();
 my $OLDSTDOUT;
 my $OLDSTDERR;
+my $LOGFILE;
+
+sub setup_log {
+        open($OLDSTDOUT, ">&", \*STDOUT) || die;
+        open($OLDSTDERR, ">&", \*STDERR) || die;
+        open($LOGFILE,   ">" , $logfile) || die;
+}
 
 sub print_and_system {
         my ($cmd) = @_;
@@ -479,6 +486,7 @@ if ($installdeps) {
 # ========== prepare ==========
 
 print_and_system "mkdir -p $build_path";
+setup_log();
 
 if (-d "$build_path_perl/.git") {
         print_and_system "cd $build_path_perl && git config remote.origin.url $giturl";
