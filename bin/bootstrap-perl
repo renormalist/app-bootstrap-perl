@@ -322,8 +322,18 @@ sub print_and_system_out {
 
 sub print_and_qx {
         my ($cmd) = @_;
-        print $cmd."\n";
-        qx($cmd);
+        my (undef, undef, $line0, $func0) = caller(0);
+        my (undef, undef, $line1, $func1) = caller(1);
+        my $line = defined($func1) && $func1 eq 'main::print_and_qx_chomp'? $line1: $line0;
+        my $exitcode;
+        my $out;
+ 
+        $out = qx($cmd 2>&1);
+        $exitcode = $?;
+        print $LOGFILE $out."\n";
+        $exitcode == 0 || die "$0($line): $cmd ($exitcode>>".($exitcode>>8).")";
+ 
+        $out;
 }
 
 sub print_and_qx_chomp {
