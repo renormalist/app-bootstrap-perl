@@ -264,6 +264,7 @@ my $dry;
 my $prefix;
 my $prefixbase          = "/opt";
 my $version             = "blead";
+my $VERSION;
 my $installdeps;
 my $sourcetgz           = "/var/tmp/perl.tar.gz";
 my $blead               = 0;
@@ -501,8 +502,22 @@ print_and_system "cd $build_path_perl && git pull";
 print_and_system "cd $build_path_perl && git checkout $version";
 print_and_system "cd $build_path_perl && git pull";
 
+# ========= version =========
+
+my $gitdescribe;
+$gitdescribe = print_and_qx_chomp qq!cd $build_path_perl && git describe --all!;
+$gitdescribe = print_and_qx_chomp qq!cd $build_path_perl && git describe! if ($gitdescribe =~ m,/, && $gitdescribe !~ m,tags/,);
+$gitdescribe =~ s|^tags/||g;
+my $gitchangeset = print_and_qx_chomp qq!cd $build_path_perl && git rev-parse HEAD!;
+my ($perl_revision, $perl_version, $perl_subversion) = $gitdescribe =~ m/^\D*(\d+)[._](\d+)(?:[._](\d+))?.*$/g;
+$perl_version    = sprintf("%02d", $perl_version);
+$perl_subversion ||= 0;
+$VERSION = eval("v$perl_revision.$perl_version.$perl_subversion");
+
+# ========= cherry-picks  =========
+
 # cherry pick several bugfixes in 5.8/5.9 that break building
-if ($version =~ /(v|perl-)?5\.8\./ or $version =~ /(v|perl-)?5\.9\.[01234]/) {
+if (v5.8.0 le $VERSION && $VERSION le v5.9.4) {
         print "*** cherry-pick building fixes for older perl versions\n";
         # FIX: <command-line>
         print_and_system qq!cd $build_path_perl && git cherry-pick -n cf14425e2bd169ce935f76d359f3253b51e441a0!;
@@ -514,16 +529,12 @@ if ($version =~ /(v|perl-)?5\.8\./ or $version =~ /(v|perl-)?5\.9\.[01234]/) {
         print_and_system q'sudo ln -sf `find  /usr/src -name page.h | grep arch/x86/include/asm/page.h | tail -1` /usr/include/asm/'  if ! -e "/usr/include/asm/page.h";
 }
 
-# ========== prepare paths ==========
+if ($VERSION lt v5.14.0) {
+        print "*** cherry-pick: fix search libs in configure (all < 5.14.0)\n";
+        print_and_system qq!cd $build_path_perl && git cherry-pick -n 40f026236b9959b7ad3260fedc6c66cd30bb7abc!;
+}       
 
-my $gitdescribe;
-$gitdescribe = print_and_qx_chomp qq!cd $build_path_perl && git describe --all!;
-$gitdescribe = print_and_qx_chomp qq!cd $build_path_perl && git describe! if ($gitdescribe =~ m,/, && $gitdescribe !~ m,tags/,);
-$gitdescribe =~ s|^tags/||g;
-my $gitchangeset = print_and_qx_chomp qq!cd $build_path_perl && git rev-parse HEAD!;
-my ($perl_revision, $perl_version, $perl_subversion) = $gitdescribe =~ m/^\D*(\d+)[._](\d+)(?:[._](\d+))?.*$/g;
-$perl_version    = sprintf("%02d", $perl_version);
-$perl_subversion ||= 0;
+# ========== prepare paths ==========
 
 unless (defined $perl_revision && defined $perl_version)
 {
