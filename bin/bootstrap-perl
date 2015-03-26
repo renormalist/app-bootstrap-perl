@@ -330,7 +330,7 @@ sub print_and_qx {
  
         $out = qx($cmd 2>&1);
         $exitcode = $?;
-        print $LOGFILE $out."\n";
+        print $LOGFILE "$cmd\n$out\n";
         $exitcode == 0 || die "$0($line): $cmd ($exitcode>>".($exitcode>>8).")";
  
         $out;
