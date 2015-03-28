@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.08      2015-03-28
         - now --blead allows every commit contained in blead
         - easier benchmarking of local (non-upstream) changesets
           --giturl|-g .
