@@ -254,6 +254,7 @@ my $HOME                = $ENV{HOME};
 my $build_path          = "/tmp/bootstrap-perl-build";
 my $build_path_perl     = "$build_path/perl";
 my $logfile             = "$build_path/bootstrap-perl.log";
+my $logcommand          = "$build_path/command.log";
 my $giturl              = "git://github.com/Perl/perl5.git";
 
 my $cpucount             = `cat /proc/cpuinfo | grep bogomips | wc -l`; chomp $cpucount;
@@ -288,17 +289,21 @@ my @exesuffixes         = ();
 my $OLDSTDOUT;
 my $OLDSTDERR;
 my $LOGFILE;
+my $COMMAND;
 
 sub setup_log {
         open($OLDSTDOUT, ">&", \*STDOUT) || die;
         open($OLDSTDERR, ">&", \*STDERR) || die;
         open($LOGFILE,   ">" , $logfile) || die;
+        open($COMMAND,   ">",  $logcommand) || die;
 }
 
 sub print_and_system {
         my ($cmd) = @_;
         my $exitcode;
         my (undef, undef, $line) = caller;
+
+        print $COMMAND $cmd, "\n";
 
         open(STDOUT, ">&", $LOGFILE) || die;
         open(STDERR, ">&", $LOGFILE) || die;
@@ -315,6 +320,8 @@ sub print_and_system {
 sub print_and_system_out {
         my ($cmd) = @_;
         my (undef, undef, $line) = caller;
+        
+        print $COMMAND $cmd, "\n";
 
         print $cmd."\n";
         print $LOGFILE $cmd."\n";
@@ -329,6 +336,8 @@ sub print_and_qx {
         my $exitcode;
         my $out;
  
+        print $COMMAND $cmd, "\n";
+
         $out = qx($cmd 2>&1);
         $exitcode = $?;
         print $LOGFILE "$cmd\n$out\n";
