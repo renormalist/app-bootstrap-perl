@@ -447,6 +447,7 @@ my @default_runargs    = ();
 my @default_modules    = ();
 my @default_mirrors    = (qw( http://search.cpan.org/CPAN/ ));
 
+return if defined($::{"no_run"});
 setup_user();
 print $USER "\n";
 print $USER "============================================================\n";
