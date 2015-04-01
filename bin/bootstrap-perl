@@ -284,19 +284,56 @@ my @runscripts          = ();
 my @runargs             = ();
 my @confargs            = ();
 my @exesuffixes         = ();
-my $OLDSTDOUT           = *STDOUT;
-my $OLDSTDERR           = *STDERR;
+my $OLDSTDOUT;
+my $OLDSTDERR;
+my $LOGFILE;
+
+sub setup_log {
+        open($OLDSTDOUT, ">&", \*STDOUT) || die;
+        open($OLDSTDERR, ">&", \*STDERR) || die;
+        open($LOGFILE,   ">" , $logfile) || die;
+}
 
 sub print_and_system {
         my ($cmd) = @_;
+        my $exitcode;
+        my (undef, undef, $line) = caller;
+
+        open(STDOUT, ">&", $LOGFILE) || die;
+        open(STDERR, ">&", $LOGFILE) || die;
+
         print $cmd."\n";
-        system ($cmd);
+        $exitcode = system ($cmd);
+
+        open(STDOUT, ">&", $OLDSTDOUT) || die;
+        open(STDERR, ">&", $OLDSTDERR) || die;
+
+        $exitcode == 0 || die "$0($line): $cmd ($exitcode>>".($exitcode>>8).")";
+}
+
+sub print_and_system_out {
+        my ($cmd) = @_;
+        my (undef, undef, $line) = caller;
+
+        print $cmd."\n";
+        print $LOGFILE $cmd."\n";
+        system ($cmd) == 0 || die "$0($line): $cmd ($?>>".($?>>8).")"; 
 }
 
 sub print_and_qx {
         my ($cmd) = @_;
-        print $cmd."\n";
-        qx($cmd);
+        my (undef, undef, $line0, $func0) = caller(0);
+        my (undef, undef, $line1, $func1) = caller(1);
+        my $line = defined($func1) && $func1 eq 'main::print_and_qx_chomp'? $line1: $line0;
+        my $exitcode;
+        my $out;
+ 
+        $out = qx($cmd 2>&1);
+        $exitcode = $?;
+        print $LOGFILE "$cmd\n$out\n";
+        $exitcode == 0 || die "$0($line): $cmd ($exitcode>>".($exitcode>>8).")";
+ 
+        $out;
 }
 
 sub print_and_qx_chomp {
@@ -478,7 +515,8 @@ if ($installdeps) {
 
 # ========== prepare ==========
 
-print_and_system "mkdir -p $build_path";
+system("mkdir -p $build_path") == 0 || die;
+setup_log();
 
 if (-d "$build_path_perl/.git") {
         print_and_system "cd $build_path_perl && git config remote.origin.url $giturl";
@@ -486,9 +524,9 @@ if (-d "$build_path_perl/.git") {
 else
 {
         if (-e $sourcetgz) {
-                print_and_system "cd $build_path && tar xzf $sourcetgz";
+                print_and_system_out "cd $build_path && tar xzf $sourcetgz";
         } else {
-                print_and_system "cd $build_path && git clone $giturl perl";
+                print_and_system_out "cd $build_path && git clone $giturl perl";
         }
 }
 
