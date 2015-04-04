@@ -290,6 +290,11 @@ my $OLDSTDOUT;
 my $OLDSTDERR;
 my $LOGFILE;
 my $COMMAND;
+my $USER;
+
+sub setup_user {
+        open($USER, ">&", \*STDOUT) || die;
+}
 
 sub setup_log {
         open($OLDSTDOUT, ">&", \*STDOUT) || die;
@@ -303,12 +308,11 @@ sub print_and_system {
         my $exitcode;
         my (undef, undef, $line) = caller;
 
-        print $COMMAND $cmd, "\n";
-
         open(STDOUT, ">&", $LOGFILE) || die;
         open(STDERR, ">&", $LOGFILE) || die;
 
-        print $cmd."\n";
+        print $COMMAND $cmd, "\n";
+        print $LOGFILE $cmd, "\n";
         $exitcode = system ($cmd);
 
         open(STDOUT, ">&", $OLDSTDOUT) || die;
@@ -322,9 +326,8 @@ sub print_and_system_out {
         my (undef, undef, $line) = caller;
         
         print $COMMAND $cmd, "\n";
-
-        print $cmd."\n";
-        print $LOGFILE $cmd."\n";
+        print $LOGFILE $cmd, "\n";
+        print $USER    $cmd, "\n";
         system ($cmd) == 0 || die "$0($line): $cmd ($?>>".($?>>8).")"; 
 }
 
@@ -337,10 +340,10 @@ sub print_and_qx {
         my $out;
  
         print $COMMAND $cmd, "\n";
-
+        print $LOGFILE $cmd, "\n";
         $out = qx($cmd 2>&1);
         $exitcode = $?;
-        print $LOGFILE "$cmd\n$out\n";
+        print $LOGFILE $out, "\n";
         $exitcode == 0 || die "$0($line): $cmd ($exitcode>>".($exitcode>>8).")";
  
         $out;
@@ -413,7 +416,7 @@ my $ok = GetOptions (
 
 if ($help) {
         exec("perldoc", "bootstrap-perl") or do {
-                print "\nPlease see 'perldoc bootstrap-perl' for help.\n";
+                print $USER "\nPlease see 'perldoc bootstrap-perl' for help.\n";
                 exit 0;
         }
 }
@@ -433,17 +436,18 @@ my @default_runargs    = ();
 my @default_modules    = ();
 my @default_mirrors    = (qw( http://search.cpan.org/CPAN/ ));
 
-print "\n";
-print "============================================================\n";
-print "Bootstrap Perl\n";
-print "============================================================\n";
+setup_user();
+print $USER "\n";
+print $USER "============================================================\n";
+print $USER "Bootstrap Perl\n";
+print $USER "============================================================\n";
 
 # giturl "." means clone from local dir
 if ($giturl eq '.') {
         $giturl = getcwd;
         my $firstcommit = qx!git log --oneline 8d063cd8450e59ea1c611a2f4f5a21059a2804f1 2> /dev/null!;
         if ($firstcommit !~ /a "replacement" for awk and sed/) {
-                print "Local git repo does not look like it is Perl's.\n";
+                print $USER "Local git repo does not look like it is Perl's.\n";
                 exit 1;
         }
 }
@@ -514,11 +518,11 @@ sub installdeps_debian
 if ($installdeps) {
         my @SUPPORTED_DISTROS = (qw(debian));
         if (grep { /$installdeps/ } @SUPPORTED_DISTROS) {
-                print "Install dependencies for: $installdeps\n";
+                print $USER "Install dependencies for: $installdeps\n";
                 eval "installdeps_$installdeps()";
         } else {
-                print "Unsupported dependency installation for distro: $installdeps\n";
-                print "Allowed distros: ".join(", ", @SUPPORTED_DISTROS), "\n";
+                print $USER "Unsupported dependency installation for distro: $installdeps\n";
+                print $USER "Allowed distros: ".join(", ", @SUPPORTED_DISTROS), "\n";
                 exit 1;
         }
 }
@@ -565,7 +569,7 @@ $VERSION = eval("v$perl_revision.$perl_version.$perl_subversion");
 
 # cherry pick several bugfixes in 5.8/5.9 that break building
 if (v5.8.0 le $VERSION && $VERSION le v5.9.4) {
-        print "*** cherry-pick building fixes for older perl versions\n";
+        print $USER "*** cherry-pick building fixes for older perl versions\n";
         # FIX: <command-line>
         print_and_system qq!cd $build_path_perl && git cherry-pick -n cf14425e2bd169ce935f76d359f3253b51e441a0!;
         # FIX: rebuild / gcc -g
@@ -577,7 +581,7 @@ if (v5.8.0 le $VERSION && $VERSION le v5.9.4) {
 }
 
 if ($VERSION lt v5.14.0) {
-        print "*** cherry-pick: fix search libs in configure (all < 5.14.0)\n";
+        print $USER "*** cherry-pick: fix search libs in configure (all < 5.14.0)\n";
         print_and_system qq!cd $build_path_perl && git cherry-pick -n 40f026236b9959b7ad3260fedc6c66cd30bb7abc!;
 }       
 
@@ -586,8 +590,8 @@ if ($VERSION lt v5.14.0) {
 unless (defined $perl_revision && defined $perl_version)
 {
         no warnings 'uninitialized';
-        print "# Bummer! Unrecognized version schema ($gitdescribe).\n";
-        print "# ($perl_revision, $perl_version, $perl_subversion)\n";
+        print $USER "# Bummer! Unrecognized version schema ($gitdescribe).\n";
+        print $USER "# ($perl_revision, $perl_version, $perl_subversion)\n";
         exit 1;
 }
 
@@ -596,27 +600,27 @@ my $PREFIX               = $prefix || _perl_pathprefix($perl_revision, $perl_ver
 my $USETHREADS           = $usethreads ? "-Dusethreads"  : "";
 my $BIT64                = $bit64      ? "-Duse64bitall" : "";
 
-print "\n";
-print "============================================================\n\n";
-print "  Bootstrap Perl\n";
-print "  --------------\n\n";
-print "  version:        $version\n\n";
-print "  git-describe:   $gitdescribe\n\n";
-print "  git-changeset:  $gitchangeset\n\n";
-print "  codespeed name: $codespeed_executable\n\n";
-print "  PREFIX:         $PREFIX\n\n";
-print "  configureargs:  ".join("\n                  ", @confargs)."\n\n";
-print "  CPAN mirrors:   ".join("\n                  ", @CPANMIRRORS)."\n\n";
-print "  modules:        ".join("\n                  ", @MODULES)."\n\n";
-print "  scripts:        ".join("\n                  ", map { $_ ." ".join(" ", @RUNARGS) } @RUNSCRIPTS)."\n\n";
-print "============================================================\n\n";
+print $USER "\n";
+print $USER "============================================================\n\n";
+print $USER "  Bootstrap Perl\n";
+print $USER "  --------------\n\n";
+print $USER "  version:        $version\n\n";
+print $USER "  git-describe:   $gitdescribe\n\n";
+print $USER "  git-changeset:  $gitchangeset\n\n";
+print $USER "  codespeed name: $codespeed_executable\n\n";
+print $USER "  PREFIX:         $PREFIX\n\n";
+print $USER "  configureargs:  ".join("\n                  ", @confargs)."\n\n";
+print $USER "  CPAN mirrors:   ".join("\n                  ", @CPANMIRRORS)."\n\n";
+print $USER "  modules:        ".join("\n                  ", @MODULES)."\n\n";
+print $USER "  scripts:        ".join("\n                  ", map { $_ ." ".join(" ", @RUNARGS) } @RUNSCRIPTS)."\n\n";
+print $USER "============================================================\n\n";
 
 my @in_blead = grep { / blead$/ }
                map  { chomp ; $_ }
                print_and_qx qq!git branch --contains $gitchangeset!;
 if ($blead && !@in_blead) {
-        print "# Bummer!\n";
-        print "#   Use '--blead' only with commits in blead branch.\n";
+        print $USER "# Bummer!\n";
+        print $USER "#   Use '--blead' only with commits in blead branch.\n";
         exit 1;
 }
 $ENV{PERL_AUTOINSTALL} = "--defaultdeps";
@@ -634,7 +638,7 @@ my $DRY = $dry ? "-n" : "";
 
 if ( ! -e $perl_codespeed )
 {
-        print "*** BUILD perl\n";
+        print $USER "*** BUILD perl\n";
         # ========== configure ==========
 
         print_and_system "cd $build_path_perl; sh Configure -de -Dusedevel $USETHREADS $BIT64 $CONFARGS -Dprefix=$PREFIX";
@@ -658,7 +662,7 @@ if ( ! -e $perl_codespeed )
 
         print_and_system "cd $build_path_perl; make $DRY install";
 } else {
-        print "*** SKIP building perl - already existing.\n";
+        print $USER "*** SKIP building perl - already existing.\n";
 }
 
 # ========== perlformance utils ==========
@@ -692,10 +696,10 @@ my $PERL     = print_and_qx_chomp qq!ls -drt1 $PREFIX/bin/perl5.*.*     | tail -
 my $PERLDOC  = print_and_qx_chomp qq!ls -drt1 $PREFIX/bin/perldoc5.*.*  | tail -1!;
 my $POD2TEXT = print_and_qx_chomp qq!ls -drt1 $PREFIX/bin/pod2text5.*.* | tail -1!;
 
-print "# CPAN:     $CPAN\n";
-print "# PERL:     $PERL\n";
-print "# PERLDOC:  $PERLDOC\n";
-print "# POD2TEXT: $POD2TEXT\n";
+print $USER "# CPAN:     $CPAN\n";
+print $USER "# PERL:     $PERL\n";
+print $USER "# PERLDOC:  $PERLDOC\n";
+print $USER "# POD2TEXT: $POD2TEXT\n";
 
 my $bin_perl     = "$PREFIX/bin/perl";
 my $bin_cpan     = "$PREFIX/bin/cpan";
@@ -747,7 +751,7 @@ if ($cpan)
                 chomp $pid;
                 my $exists = kill 0, $pid;
                 if (not $exists) {
-                        print "Remove stale CPAN.pm lock.\n";
+                        print $USER "Remove stale CPAN.pm lock.\n";
                         print_and_system qq!rm -f $cpanlock!;
                 }
         }
@@ -755,7 +759,7 @@ if ($cpan)
         # optionally remove sources cache to avoid conflicts,
         # like happening with hot-patched CPAN mirrors (via Pinto)
         if ($cleancpansources) {
-                print "Remove $SOURCESDIR.\n";
+                print $USER "Remove $SOURCESDIR.\n";
                 print_and_system qq!rm -fr '$SOURCESDIR'!;
         }
 
