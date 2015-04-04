@@ -251,7 +251,7 @@ use Cwd "getcwd";
 
 my $HOME                = $ENV{HOME};
 
-my $build_path          = "/tmp/bootstrap-perl-build";
+our $build_path          = "/tmp/bootstrap-perl-build";
 my $build_path_perl     = "$build_path/perl";
 my $logfile             = "$build_path/bootstrap-perl.log";
 my $logcommand          = "$build_path/command.log";
@@ -265,7 +265,7 @@ my $dry;
 my $prefix;
 my $prefixbase          = "/opt";
 my $version             = "blead";
-my $VERSION;
+our $VERSION;
 my $installdeps;
 my $sourcetgz           = "/var/tmp/perl.tar.gz";
 my $blead               = 0;
