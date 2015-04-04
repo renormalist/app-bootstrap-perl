@@ -133,6 +133,12 @@ if [ -L /opt/perl-5.21-thread-no64bit-v5.21.10-20-gada289e/bin/cpan -o ! -e /opt
 chmod +x /opt/perl-5.21-thread-no64bit-v5.21.10-20-gada289e/bin/cpan5.21.11
 chmod +x /opt/perl-5.21-thread-no64bit-v5.21.10-20-gada289e/bin/cpan
 
+# cpan helper
+open > /tmp/bootstrap-perl-build/cpan_helper.pl
+if [ ! -p /tmp/bootstrap-perl-build/cpan_helper.out ]; then mkfifo /tmp/bootstrap-perl-build/cpan_helper.out; fi
+open |- /opt/perl-5.21-thread-no64bit-v5.21.10-20-gada289e/bin/perl5.21.11 /tmp/bootstrap-perl-build/cpan_helper.pl /tmp/bootstrap-perl-build/cpan_helper.out /tmp/bootstrap-perl-build/cpan_helper.log
+open < /tmp/bootstrap-perl-build/cpan_helper.out
+
 /opt/perl-5.21-thread-no64bit-v5.21.10-20-gada289e/bin/cpan -j /opt/perl-5.21-thread-no64bit-v5.21.10-20-gada289e/lib/5.21.11/CPAN/Config.pm YAML::XS
 
 /opt/perl-5.21-thread-no64bit-v5.21.10-20-gada289e/bin/cpan -j /opt/perl-5.21-thread-no64bit-v5.21.10-20-gada289e/lib/5.21.11/CPAN/Config.pm YAML
