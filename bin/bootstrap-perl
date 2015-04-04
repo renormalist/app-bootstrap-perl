@@ -321,17 +321,25 @@ sub print_and_system {
         my $exitcode;
         my $line = caller_line();
 
-        open(STDOUT, ">&", $LOGFILE) || die;
-        open(STDERR, ">&", $LOGFILE) || die;
+        my @cmd = split / +/, $cmd;
+        my $bin = $cmd[0];
+        my $is_cpan = $bin eq bin_cpan();
 
-        print $COMMAND $cmd, "\n";
-        print $LOGFILE $cmd, "\n";
-        $exitcode = system ($cmd);
+        if (! $is_cpan) {
+                open(STDOUT, ">&", $LOGFILE) || die;
+                open(STDERR, ">&", $LOGFILE) || die;
 
-        open(STDOUT, ">&", $OLDSTDOUT) || die;
-        open(STDERR, ">&", $OLDSTDERR) || die;
+                print $COMMAND $cmd, "\n";
+                print $LOGFILE $cmd, "\n";
+                $exitcode = system ($cmd);
 
-        $exitcode == 0 || die "$0($line): $cmd ($exitcode>>".($exitcode>>8).")";
+                open(STDOUT, ">&", $OLDSTDOUT) || die;
+                open(STDERR, ">&", $OLDSTDERR) || die;
+
+                $exitcode == 0 || die "$0($line): $cmd ($exitcode>>".($exitcode>>8).")";
+        } else {
+                cpan_command(join(" ", @cmd[1..$#cmd]));
+        }
 }
 
 sub print_and_system_out {
@@ -724,6 +732,81 @@ print_and_system "if [ ! -e $bin_cpan     ] ; then ln -sf $CPAN     $bin_cpan   
 print_and_system "if [ ! -e $bin_perldoc  ] ; then ln -sf $PERLDOC  $bin_perldoc  ; fi";
 print_and_system "if [ ! -e $bin_pod2text ] ; then ln -sf $POD2TEXT $bin_pod2text ; fi";
 
+my $bin_cpan_helper  = "$build_path/cpan_helper.pl";
+my $pipe_cpan_helper = "$build_path/cpan_helper.out";
+my $log_cpan_helper  = "$build_path/cpan_helper.log";
+my $CPAN_COMMAND;
+my $CPAN_OUTPUT;
+
+my $text_cpan_helper = <<'END_HELPER';
+        use App::Cpan;
+        
+        my ($result_pipe, $logfile) = @ARGV;
+
+        open(my $LOGFILE, ">", $logfile) || die;
+        open(STDOUT, ">&", $LOGFILE) || die;
+        open(STDERR, ">&", \*STDOUT) || die;
+        print "*** HELPER_START ".localtime()."\n";
+
+        open(my $RESULT, ">", $result_pipe) || die;
+        my $ofh = select($RESULT); $| = 1; select($ofh);
+
+        my $has_cfg = 0;
+
+        while (my $cmd = <STDIN>) {
+                chomp $cmd;
+                print "*** COMMAND_START [$cmd]\n";
+
+                # pass cfg to run() only once
+                # run() uses @ARGV
+                @ARGV  = split / +/, $cmd;
+                if ($ARGV[0] eq '-j') {
+                        $has_cfg && do { @ARGV = @ARGV[2..$#ARGV] };
+                        $has_cfg = 1;
+                }
+                print "cmd now [", join(" ", @ARGV),"]\n";
+
+                my $rc = App::Cpan->run(@ARGV);
+                print "*** COMMAND_END [$rc] [$cmd]\n";
+                print $RESULT $rc, "\n";
+        }
+
+        END {
+                print "*** HELPER_END [$?] ".localtime()."\n";
+        }
+END_HELPER
+
+sub cpan_helper_setup {
+        # create helper script
+        open (my $fh_helper, ">", $bin_cpan_helper) || die;
+        print $fh_helper $text_cpan_helper || die;
+        close $fh_helper;
+
+        # create fifo, helper outputs result code to it
+        print_and_system("if [ ! -p $pipe_cpan_helper ]; then mkfifo $pipe_cpan_helper; fi");
+
+        # start helper
+        open ($CPAN_COMMAND, "|-", "$PERL $bin_cpan_helper $pipe_cpan_helper $log_cpan_helper") || die;
+        my $ofh = select $CPAN_COMMAND; $| = 1; select $ofh;
+        open ($CPAN_OUTPUT, "<", $pipe_cpan_helper) || die;
+}
+
+sub cpan_command {
+        my ($cmd) = @_;
+        $cmd =~ /\S+$/; my $mod = $&;
+        local $SIG{PIPE} = sub { die "missing helper" };
+        print $USER $mod, "\n";
+        print $COMMAND "cpan_command ", $cmd, "\n";
+        print $LOGFILE "cpan_command ", $cmd, "\n";
+        print $CPAN_COMMAND $cmd, "\n";
+        my $rc = <$CPAN_OUTPUT>; 
+        defined $rc || die "missing helper";
+        chomp $rc;
+        $rc == 0 || die "rc is $rc";
+}
+
+sub bin_cpan { $bin_cpan || "" }
+
 # ========== cpan ==========
 
 if ($cpan)
@@ -781,6 +864,8 @@ if ($cpan)
         # once upon a time the cpan exe missed the executable bit - set it to be sure
         print_and_system qq!chmod +x $CPAN!;
         print_and_system qq!chmod +x $bin_cpan!;
+
+        cpan_helper_setup();
 
         # install extended cpan toolchain; contains some "force" where we know they are really required
         print_and_system qq!$bin_cpan -j $CFG YAML::XS!;

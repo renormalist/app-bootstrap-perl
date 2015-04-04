@@ -129,14 +129,17 @@ sub test_cmd {
 
 sub core_open {
         test_cmd("open $_[1] $_[2]");
-      
+  
+        my $rw = $_[1];
+        $rw = $rw eq '|-'? '>': $rw;
+
         my $io_buf;
         if(defined($_[0])) {
-                CORE::open(qualify_to_ref($_[0]), $_[1], \$io_buf) || die;
+                CORE::open(qualify_to_ref($_[0]), $rw, \$io_buf) || die;
                 
         } else {
                 my $fh;
-                CORE::open($fh, $_[1], \$io_buf) || die;
+                CORE::open($fh, $rw, \$io_buf) || die;
                 $_[0] = $fh;
         }
         
