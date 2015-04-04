@@ -310,7 +310,7 @@ sub print_and_system {
         open(STDOUT, ">&", $OLDSTDOUT) || die;
         open(STDERR, ">&", $OLDSTDERR) || die;
 
-        $exitcode == 0 || die "$0($line): $cmd ($exitcode>>".($exitcode>>8).")";
+        $exitcode == 0 || warn "$0($line): $cmd ($exitcode>>".($exitcode>>8).")";
 }
 
 # Execute a command via system(). Output goes to normal stdout/stderr.
@@ -320,7 +320,7 @@ sub print_and_system_out {
 
         print $cmd."\n";
         print $LOGFILE $cmd."\n";
-        system ($cmd) == 0 || die "$0($line): $cmd ($?>>".($?>>8).")"; 
+        system ($cmd) == 0 || warn "$0($line): $cmd ($?>>".($?>>8).")";
 }
 
 # Execute a command via qx(). Output goes to log file.
@@ -335,8 +335,8 @@ sub print_and_qx {
         $out = qx($cmd 2>&1);
         $exitcode = $?;
         print $LOGFILE "$cmd\n$out\n";
-        $exitcode == 0 || die "$0($line): $cmd ($exitcode>>".($exitcode>>8).")";
- 
+        $exitcode == 0 || warn "$0($line): $cmd ($exitcode>>".($exitcode>>8).")";
+
         $out;
 }
 
