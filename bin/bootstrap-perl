@@ -665,37 +665,11 @@ bootstrap_perl_scripts='!      .join(";", map { $_ ." ".join(" ", @RUNARGS) } @R
                 print_and_system "cd $build_path_perl; $TEST_JOBS make $TEST";
         }
 
-
         # ========== install ==========
 
         print_and_system "cd $build_path_perl; make $DRY install";
 } else {
         print "*** SKIP building perl - already existing.\n";
-}
-
-# ========== perlformance utils ==========
-
-# create a binary that prints git version
-if (open my $PERLGITDESCRIBE, ">", $perl_gitdescribe)
-{
-        print $PERLGITDESCRIBE sprintf(qq{#! /usr/bin/env perl\n\nprint '%s'."\n";}, $gitdescribe);
-        print_and_system "chmod ugo+x $perl_gitdescribe";
-        close $PERLGITDESCRIBE;
-}
-
-if (open my $PERLGITCHANGESET, ">", $perl_gitchangeset)
-{
-        print $PERLGITCHANGESET sprintf(qq{#! /usr/bin/env perl\n\nprint '%s'."\n";}, $gitchangeset);
-        print_and_system "chmod ugo+x $perl_gitchangeset";
-        close $PERLGITCHANGESET;
-}
-
-# create a binary that prints sensible executable name for codespeed
-if (open my $PERLCODESPEED, ">", $perl_codespeed)
-{
-        print $PERLCODESPEED sprintf(qq{#! /usr/bin/env perl\n\nprint '%s'."\n";}, $codespeed_executable);
-        print_and_system "chmod ugo+x $perl_codespeed";
-        close $PERLCODESPEED;
 }
 
 # binaries
