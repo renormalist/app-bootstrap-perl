@@ -632,8 +632,7 @@ if ( ! -e $perl_codespeed )
         print "*** BUILD perl\n";
         # ========== configure ==========
 
-        print_and_system "cd $build_path_perl; sh Configure -de -Dusedevel $USETHREADS $BIT64 $CONFARGS -Dprefix=$PREFIX";
-
+        print_and_system_out "cd $build_path_perl; sh Configure -der -Dusedevel $USETHREADS $BIT64 $CONFARGS -Dprefix=$PREFIX";
 
         # ========== make ==========
 
