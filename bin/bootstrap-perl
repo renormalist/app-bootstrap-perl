@@ -634,6 +634,24 @@ if ( ! -e $perl_codespeed )
 
         print_and_system_out "cd $build_path_perl; sh Configure -der -Dusedevel $USETHREADS $BIT64 $CONFARGS -Dprefix=$PREFIX";
 
+        # ========== metainfo in Perl Config ==========
+
+        my $config_sh;
+        open ($config_sh, ">>", "$build_path_perl/config.sh") and do {
+                print $config_sh qq!\
+bootstrap_perl_perl_version='$version'
+bootstrap_perl_git_describe='$gitdescribe'
+bootstrap_perl_git_changeset='$gitchangeset'
+bootstrap_perl_symbolic_name='$codespeed_executable'
+bootstrap_perl_prefix='$PREFIX'
+bootstrap_perl_configureargs='!.join(";", @confargs)                                       .qq!'
+bootstrap_perl_cpan_mirrors='! .join(";",  @CPANMIRRORS)                                   .qq!'
+bootstrap_perl_modules='!      .join(";",  @MODULES)                                       .qq!'
+bootstrap_perl_scripts='!      .join(";", map { $_ ." ".join(" ", @RUNARGS) } @RUNSCRIPTS) .qq!'
+!;
+        };
+        close $config_sh;
+
         # ========== make ==========
 
         print_and_system "cd $build_path_perl; make $THREADS";
