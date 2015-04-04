@@ -1,6 +1,9 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - cleaner log handling (Vyacheslav Pechenin)
+        - fix building perl <5.14 (Vyacheslav Pechenin)
+        - metainfo now in built Perl's %Config
 
 0.08      2015-03-28
         - now --blead allows every commit contained in blead
