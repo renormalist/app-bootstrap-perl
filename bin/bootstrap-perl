@@ -295,6 +295,7 @@ sub setup_log {
         open($LOGFILE,   ">" , $logfile) || die;
 }
 
+# Execute a command via system(). Output goes to log file.
 sub print_and_system {
         my ($cmd) = @_;
         my $exitcode;
@@ -312,6 +313,7 @@ sub print_and_system {
         $exitcode == 0 || die "$0($line): $cmd ($exitcode>>".($exitcode>>8).")";
 }
 
+# Execute a command via system(). Output goes to normal stdout/stderr.
 sub print_and_system_out {
         my ($cmd) = @_;
         my (undef, undef, $line) = caller;
@@ -321,6 +323,7 @@ sub print_and_system_out {
         system ($cmd) == 0 || die "$0($line): $cmd ($?>>".($?>>8).")"; 
 }
 
+# Execute a command via qx(). Output goes to log file.
 sub print_and_qx {
         my ($cmd) = @_;
         my (undef, undef, $line0, $func0) = caller(0);
@@ -328,7 +331,7 @@ sub print_and_qx {
         my $line = defined($func1) && $func1 eq 'main::print_and_qx_chomp'? $line1: $line0;
         my $exitcode;
         my $out;
- 
+
         $out = qx($cmd 2>&1);
         $exitcode = $?;
         print $LOGFILE "$cmd\n$out\n";
@@ -337,6 +340,7 @@ sub print_and_qx {
         $out;
 }
 
+# Execute a command via qx(). Output goes to normal stdout/stderr.
 sub print_and_qx_chomp {
         my $out = print_and_qx @_;
         chomp $out;
