@@ -1,6 +1,9 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - Changed default target directory and naming schema.
+          Instead of /opt it now uses /$HOME/.bootstrapperl/$HOSTNAME in
+          order to simplify permissions, multi-machine usage, and backups.
 
 0.09      2015-04-05
         - cleaner log handling [Vyacheslav Pechenin]
