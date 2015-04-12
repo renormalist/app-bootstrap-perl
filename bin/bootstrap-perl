@@ -22,7 +22,7 @@ for 5.8.x.
 
 Install a threaded 64bit Perl using current "blead"
 from git with CPAN config into a path like
-C</opt/perl-5.15-thread-64bit-v5.15.5-258-ge7d0a3f>:
+C</$HOME/.bootstrapperl/$HOSTNAME/perl-5.15-thread-64bit-v5.15.5-258-ge7d0a3f>:
 
   $ bootstrap-perl [ <OPTIONS> ]
 
@@ -79,7 +79,7 @@ Install into other install directory than the unified naming schema
 
   $ bootstrap-perl --prefix <PREFIX>
 
-Use the unified naming schema but not under C</opt>:
+Use the unified naming schema but not under C</$HOME/.bootstrapperl/$HOSTNAME>:
 
   $ bootstrap-perl --prefixbase /foo/bar
 
@@ -209,12 +209,12 @@ those benchmarks with no extra dependencies
 
 It uses a unified naming schema for it's installation PREFIX:
 
-  /opt/perl-5.<VERSION>-<(no)?thread>-<(no)?64bit>-<git-describe>
+  /$HOME/.bootstrapperl/$HOSTNAME/perl-5.<VERSION>-<(no)?thread>-<(no)?64bit>-<git-describe>
 
 which leads to paths like this:
 
-  /opt/perl-5.10-thread-64bit-v5.10.0
-  /opt/perl-5.15-thread-64bit-v5.15.5-258-ge7d0a3f
+  /home/ss5/.bootstrapperl/zomtec/perl-5.10-thread-64bit-v5.10.0
+  /home/ss5/.bootstrapperl/zomtec/perl-5.15-thread-64bit-v5.15.5-258-ge7d0a3f
 
 This naming schema consist of the major version, basic configuration
 and I<git-describe>.
@@ -248,8 +248,10 @@ use warnings;
 
 use Getopt::Long ":config", "no_ignore_case", "bundling";
 use Cwd "getcwd";
+use Sys::Hostname;
 
-my $HOME                = $ENV{HOME};
+my $HOME                = $ENV{HOME} || '/opt';
+my $hostname            = hostname();
 
 our $build_path          = "/tmp/bootstrap-perl-build";
 my $build_path_perl     = "$build_path/perl";
@@ -263,7 +265,7 @@ my $threadcount          = $cpucount + 1;
 # getopt
 my $dry;
 my $prefix;
-my $prefixbase          = "/opt";
+my $prefixbase          = "$HOME/.bootstrapperl/$hostname";
 my $version             = "blead";
 our $VERSION;
 my $installdeps;
