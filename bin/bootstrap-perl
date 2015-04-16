@@ -219,28 +219,6 @@ which leads to paths like this:
 This naming schema consist of the major version, basic configuration
 and I<git-describe>.
 
-=head2 Meta info utilities
-
-To easily provide the raw I<git-describe> two scripts are is put inside
-each install
-
-  perl-gitdescribe
-  perl-gitchangeset
-
-which prints the I<git-describe> of that installation.
-
-Another script
-
-  perl-codespeed-executable
-
-is put inside each install which prints a so called "executable name"
-for this built perl used on a codespeed instance like
-L<http://speed.perlformance.net|http://speed.perlformance.net>. Although
-this is unlikely to be useful for others it is always created.
-
-These two utility scripts B<could> be derived from the install prefix
-but also work when you provided your own prefix.
-
 =cut
 
 use strict;
