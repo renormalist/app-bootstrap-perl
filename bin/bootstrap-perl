@@ -584,8 +584,8 @@ if (v5.8.0 le $VERSION && $VERSION le v5.9.4) {
         print_and_system q'sudo ln -sf `find  /usr/src -name page.h | grep arch/x86/include/asm/page.h | tail -1` /usr/include/asm/'  if ! -e "/usr/include/asm/page.h";
 }
 
-if ($VERSION lt v5.14.0) {
-        print $USER "*** cherry-pick: fix search libs in configure (all < 5.14.0)\n";
+if ($VERSION lt v5.12.4) {
+        print $USER "*** cherry-pick: fix search libs in configure\n";
         print_and_system qq!cd $build_path_perl && git cherry-pick -n 40f026236b9959b7ad3260fedc6c66cd30bb7abc!;
         print_and_system qq!cd $build_path_perl && git cherry-pick -n bcab1245a0693be445ce018352f6fbe4abc26e88!;
 }
