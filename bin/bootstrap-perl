@@ -231,7 +231,7 @@ use Sys::Hostname;
 my $HOME                = $ENV{HOME} || '/opt';
 my $hostname            = hostname();
 
-our $build_path          = "/tmp/bootstrap-perl-build";
+our $build_path          = "$HOME/.bootstrapperl/bootstrap-perl-build";
 my $build_path_perl     = "$build_path/perl";
 my $logfile             = "$build_path/bootstrap-perl.log";
 my $logcommand          = "$build_path/command.log";
