@@ -880,6 +880,14 @@ if ($cpan)
                 # ignore known failing tests
                 print_and_system qq!$bin_cpan -j $CFG -f -i Module::Build!;
         }
+        if ($gitdescribe =~ /perl-5\.8\./) {
+                # ignore Failed test 'all_config is \%Config'
+                print_and_system qq!$bin_cpan -j $CFG -f -i ExtUtils::Config!;
+        }
+        if ($gitdescribe =~ /perl-5\.8\./) {
+                # test failure on some of my machines
+                print_and_system qq!$bin_cpan -j $CFG -f -i List::MoreUtils!;
+        }
         if ($gitdescribe =~ /perl-5\.9\./) {
                 # ignore known hanging tests with utf8
                 print_and_system qq! echo "notest install Test::Simple" | $bin_cpan -j $CFG!;
