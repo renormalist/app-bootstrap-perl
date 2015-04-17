@@ -4,6 +4,9 @@ Revision history for {{$dist->name}}
         - Changed default target directory and naming schema.
           Instead of /opt it now uses /$HOME/.bootstrapperl/$HOSTNAME in
           order to simplify permissions, multi-machine usage, and backups.
+        - fine-tune build fixes for Perl <= 5.12.3
+        - some more notest/force cpan dependencies on Perl 5.8
+        - reworked meta info injection into %Config
 
 0.09      2015-04-05
         - cleaner log handling [Vyacheslav Pechenin]
