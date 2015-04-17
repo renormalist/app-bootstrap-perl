@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - force ExtUtils::Config
+        - POD in generated CPAN::Config to find with perldoc -l
 
 0.10      2015-04-17
         - Changed default target directory and naming schema.
