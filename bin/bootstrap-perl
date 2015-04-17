@@ -645,15 +645,29 @@ my $DRY = $dry ? "-n" : "";
 if ( ! -e $perl_codespeed )
 {
         print $USER "*** BUILD perl\n";
-        # ========== configure ==========
-
-        print_and_system_out "cd $build_path_perl; sh Configure -der -Dusedevel $USETHREADS $BIT64 $CONFARGS -Dprefix=$PREFIX";
 
         # ========== metainfo in Perl Config ==========
 
-        my $config_sh;
-        open ($config_sh, ">>", "$build_path_perl/config.sh") and do {
-                print $config_sh qq!\
+        # This (mis-)uses a built-in mechanism in Configure.
+        #
+        # Ultimately we want to inject meta information so it appears
+        # later in Perl's %Config.
+        #
+        # Instead of dumping metadata directly into "config.arch" it
+        # generates script code in there that in turn appends variable
+        # assignments to "UU/config.sh" which in turn pretend to
+        # later Configure steps that there would be configuration data
+        # of an earlier session which it then merges into %Config.
+        #
+        # It should work for any ancient or future Perl 5 version.
+        # Credits to Tux for help sorting this out.
+
+        my $config_arch;
+        print $USER "*** CONFIGURE meta information for Perl's \%Config via config.arch\n";
+        open ($config_arch, ">>", "$build_path_perl/config.arch") and do {
+                print $config_arch qq!\
+cat >> UU/config.sh <<EOUUCONFIG
+: Meta information from bootstrap-perl for later Perl Config
 bootstrap_perl_perl_version='$version'
 bootstrap_perl_git_describe='$gitdescribe'
 bootstrap_perl_git_changeset='$gitchangeset'
@@ -663,9 +677,14 @@ bootstrap_perl_configureargs='!.join(";", @confargs)                            
 bootstrap_perl_cpan_mirrors='! .join(";",  @CPANMIRRORS)                                   .qq!'
 bootstrap_perl_modules='!      .join(";",  @MODULES)                                       .qq!'
 bootstrap_perl_scripts='!      .join(";", map { $_ ." ".join(" ", @RUNARGS) } @RUNSCRIPTS) .qq!'
+EOUUCONFIG
 !;
         };
-        close $config_sh;
+        close $config_arch;
+
+        # ========== Configure ==========
+
+        print_and_system_out "cd $build_path_perl; sh Configure -der -Dusedevel $USETHREADS $BIT64 $CONFARGS -Dprefix=$PREFIX";
 
         # ========== make ==========
 
