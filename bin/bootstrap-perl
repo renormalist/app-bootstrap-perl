@@ -523,7 +523,7 @@ sub installdeps_debian
 if ($installdeps) {
         my @SUPPORTED_DISTROS = (qw(debian));
         if (grep { /$installdeps/ } @SUPPORTED_DISTROS) {
-                print $USER "Install dependencies for: $installdeps\n";
+                print $USER "*** Install dependencies for: $installdeps\n";
                 eval "installdeps_$installdeps()";
         } else {
                 print $USER "Unsupported dependency installation for distro: $installdeps\n";
@@ -771,13 +771,13 @@ sub cpan_helper_setup {
 sub cpan_command {
         my ($cmd) = @_;
         $cmd =~ /\S+$/; my $mod = $&;
-        local $SIG{PIPE} = sub { die "missing helper" };
+        local $SIG{PIPE} = sub { die "cpan helper pipe broke" };
         print $USER $mod, "\n";
         print $COMMAND "cpan_command ", $cmd, "\n";
         print $LOGFILE "cpan_command ", $cmd, "\n";
         print $CPAN_COMMAND $cmd, "\n";
-        my $rc = <$CPAN_OUTPUT>; 
-        defined $rc || die "missing helper";
+        my $rc = <$CPAN_OUTPUT>;
+        defined $rc || die "could not get cpan helper output";
         chomp $rc;
         $rc == 0 || die "rc is $rc";
 }
@@ -823,7 +823,7 @@ if ($cpan)
                 chomp $pid;
                 my $exists = kill 0, $pid;
                 if (not $exists) {
-                        print $USER "Remove stale CPAN.pm lock.\n";
+                        print $USER "# Remove stale CPAN.pm lock.\n";
                         print_and_system qq!rm -f $cpanlock!;
                 }
         }
@@ -831,7 +831,7 @@ if ($cpan)
         # optionally remove sources cache to avoid conflicts,
         # like happening with hot-patched CPAN mirrors (via Pinto)
         if ($cleancpansources) {
-                print $USER "Remove $SOURCESDIR.\n";
+                print $USER "# Remove $SOURCESDIR.\n";
                 print_and_system qq!rm -fr '$SOURCESDIR'!;
         }
 
@@ -923,6 +923,8 @@ foreach my $runscript (@RUNSCRIPTS) {
 
 __DATA__
 
+# AUTO-GENERATED -- see https://metacpan.org/pod/bootstrap-perl
+#
 # This is CPAN.pm's systemwide configuration file. This file provides
 # defaults for users, and the values can be changed in a per-user
 # configuration file. The user-config file is being looked for as
