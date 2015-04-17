@@ -863,6 +863,9 @@ if ($cpan)
 
         cpan_helper_setup();
 
+        # Our config fiddling seems to confuse ExtUtils::Config, probably due to cherry-picks, however it's not a real bug - so force it
+        print_and_system qq!$bin_cpan -j $CFG -f -i ExtUtils::Config!;
+
         # install extended cpan toolchain; contains some "force" where we know they are really required
         print_and_system qq!$bin_cpan -j $CFG YAML::XS!;
         print_and_system qq!$bin_cpan -j $CFG YAML!;
@@ -899,10 +902,6 @@ if ($cpan)
         if ($gitdescribe =~ /perl-5\.8\.0/) {
                 # ignore known failing tests
                 print_and_system qq!$bin_cpan -j $CFG -f -i Module::Build!;
-        }
-        if ($gitdescribe =~ /perl-5\.8\./) {
-                # ignore Failed test 'all_config is \%Config'
-                print_and_system qq!$bin_cpan -j $CFG -f -i ExtUtils::Config!;
         }
         if ($gitdescribe =~ /perl-5\.8\./) {
                 # test failure on some of my machines
