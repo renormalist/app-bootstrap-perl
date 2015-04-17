@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.11      2015-04-17
         - force ExtUtils::Config
         - POD in generated CPAN::Config to find with perldoc -l
 
