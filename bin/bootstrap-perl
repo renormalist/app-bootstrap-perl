@@ -513,7 +513,8 @@ sub installdeps_debian
                                 libgmp3-dev
                                 libssl-dev
                                 libpcre3-dev
-                              ));
+                              )
+                            );
         foreach my $dep (@DEPENDECIES) {
                 print_and_system "$APTGET install $dep\n";
         }
@@ -716,7 +717,7 @@ my $CPAN_OUTPUT;
 
 my $text_cpan_helper = <<'END_HELPER';
         use App::Cpan;
-        
+
         my ($result_pipe, $logfile) = @ARGV;
 
         open(my $LOGFILE, ">", $logfile) || die;
@@ -919,7 +920,6 @@ if ($cpan)
 foreach my $runscript (@RUNSCRIPTS) {
         print_and_system qq!$PREFIX/bin/$runscript !.join(" ", @RUNARGS);
 }
-# print_and_system qq!$PREFIX/bin/tapper-testsuite-benchmark-perlformance!;
 
 __DATA__
 
