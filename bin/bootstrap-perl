@@ -821,7 +821,8 @@ if ($cpan)
         print_and_system qq!rm -fr $CPANBUILDDIR!;
 
         # Configure CPAN initially
-        my $CFG = print_and_qx_chomp qq!$PERLDOC -l CPAN | sed -e "s/CPAN\.pm/CPAN\\/Config.pm/"!;
+        my $CFG   = print_and_qx_chomp qq!$PERLDOC -l CPAN | sed -e "s/CPAN\.pm/CPAN\\/Config.pm/"!;
+        my $MYCFG = print_and_qx_chomp qq!$PERLDOC -l CPAN | sed -e "s/CPAN\.pm/CPAN\\/MyConfig.pm/"!;
 
         if ($forcecpancfg or ! -e $CFG) {
                 my $CPANCFG = do { local $/; <DATA> };
@@ -829,9 +830,16 @@ if ($cpan)
                 $CPANCFG =~ s/__DISTROPREFSDIR__/$DISTROPREFSDIR/g;
                 $CPANCFG =~ s/__MIRRORS__/$MIRRORSLIST/g;
                 $CPANCFG =~ s/__PREFIXBASE__/$prefixbase/g;
-                open CPANCFG, ">", $CFG or die "Can not create $CFG";
-                print CPANCFG $CPANCFG;
-                close CPANCFG;
+
+                # the real cpan config
+                open my $CPANCFGFILE, ">", $CFG or die "Can not create $CFG";
+                print $CPANCFGFILE $CPANCFG;
+                close $CPANCFGFILE;
+
+                # empty MyConfig to suppress loading one from ~/.cpan/
+                open my $MYCPANCFGFILE, ">", $CFG or die "Can not create $CFG";
+                print $MYCPANCFGFILE "package CPAN::MyConfig;\n1;\n\n=head1 ABOUT\n\nEmpty CPAN::MyConfig to suppress loading one from C<~/.cpan/>.\n\n=cut\n\n";
+                close $MYCPANCFGFILE;
         }
 
         # remove stale cpan lock
