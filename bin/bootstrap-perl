@@ -255,6 +255,7 @@ my $test                = 0;
 my $cpan                = 1;
 my $cleancpansources    = 0;
 my $forcecpancfg        = 1;
+my $forcebuildperl      = 0;
 my $perlformance        = 0;
 my $perlformance_local  = 0;
 my $perlformance_report = 0;
@@ -403,6 +404,7 @@ my $ok = GetOptions (
                      "cpan!"        => \$cpan,
                      "cleancpansources!" => \$cleancpansources,
                      "forcecpancfg!" => \$forcecpancfg,
+                     "forcebuildperl!" => \$forcebuildperl,
                      'perlformance' => \$perlformance,
                      'perlformance-local' => \$perlformance_local,
                      'perlformance-report' => \$perlformance_report,
@@ -632,16 +634,14 @@ $ENV{PERL_AUTOINSTALL} = "--defaultdeps";
 $ENV{TEST_JOBS}        = $threadcount;
 $ENV{TWMC_TEST_PORT}   = "9876";
 
-my $perl_gitdescribe = "$PREFIX/bin/perl-gitdescribe";
-my $perl_gitchangeset = "$PREFIX/bin/perl-gitchangeset";
-my $perl_codespeed = "$PREFIX/bin/perl-codespeed-executable";
+my $perl_exe = "$PREFIX/bin/perl";
 
 my $THREADS = $jobs ? "-j $jobs" : "-j $threadcount";
 my $DRY = $dry ? "-n" : "";
 
 # ========== build ==========
 
-if ( ! -e $perl_codespeed )
+if ($forcebuildperl or ! -x $perl_exe )
 {
         print $USER "*** BUILD perl\n";
 
