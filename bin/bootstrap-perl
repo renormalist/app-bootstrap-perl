@@ -1,6 +1,5 @@
+#! /usr/bin/perl
 # -*- mode: cperl -*-
-eval 'exec /usr/bin/perl -S $0 ${1+"$@"}'
-    if 0; # not running under some shell
 
 # PODNAME: bootstrap-perl
 # ABSTRACT: Bootstrap Perl inclusive CPAN from git
