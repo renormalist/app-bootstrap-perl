@@ -110,6 +110,36 @@ Run the perl test suite:
 
 Default is B<not> to run the tests.
 
+=head3 (re-)build Perl
+
+You can specify whether you want to compile perl even when an
+executable C<perl> already exists:
+
+  $ bootstrap-perl --forcebuildperl
+  $ bootstrap-perl --noforcebuildperl
+
+Default is B<off>.
+
+=head3 bootstrap CPAN
+
+You can specify whether to bootstrap a full CPAN environment with
+distroprefs and dependencies:
+
+  $ bootstrap-perl --cpan
+  $ bootstrap-perl --nocpan
+
+Default is B<on>.
+
+=head3 (re-)configure CPAN
+
+You can specify whether to (re-)write a CPAN config
+(C<CPAN/Config.pm>, C<CPAN/MyConfig.pm>) even when it already exists:
+
+  $ bootstrap-perl --forcecpancfg
+  $ bootstrap-perl --noforcecpancfg
+
+Default is B<on>.
+
 =head3 use threads
 
 Build a threaded Perl (C<-Dusethreads>):
