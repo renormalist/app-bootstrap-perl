@@ -363,7 +363,7 @@ sub print_and_system_out {
         print $COMMAND $cmd, "\n";
         print $LOGFILE $cmd, "\n";
         print $USER    $cmd, "\n";
-        system ($cmd) == 0 || warn "$0($line): $cmd ($?>>".($?>>8).")"; 
+        system ($cmd) == 0 || warn "$0($line): $cmd ($?>>".($?>>8).")";
 }
 
 # Execute a command via qx(). Output goes to log file.
@@ -607,7 +607,7 @@ $VERSION = eval("v$perl_revision.$perl_version.$perl_subversion");
 
 # cherry pick several bugfixes in 5.8/5.9 that break building
 if (v5.8.0 le $VERSION && $VERSION le v5.9.4) {
-        print $USER "*** cherry-pick building fixes for older perl versions\n";
+        print $LOGFILE "*** cherry-pick building fixes for older perl versions\n";
         # FIX: <command-line>
         print_and_system qq!cd $build_path_perl && git cherry-pick -n cf14425e2bd169ce935f76d359f3253b51e441a0!;
         # FIX: rebuild / gcc -g
@@ -619,7 +619,7 @@ if (v5.8.0 le $VERSION && $VERSION le v5.9.4) {
 }
 
 if ($VERSION lt v5.12.4) {
-        print $USER "*** cherry-pick: fix search libs in configure\n";
+        print $LOGFILE "*** cherry-pick: fix search libs in configure\n";
         print_and_system qq!cd $build_path_perl && git cherry-pick -n 40f026236b9959b7ad3260fedc6c66cd30bb7abc!;
         print_and_system qq!cd $build_path_perl && git cherry-pick -n bcab1245a0693be445ce018352f6fbe4abc26e88!;
 }
@@ -694,7 +694,7 @@ if ($forcebuildperl or ! -x $perl_exe )
         # Credits to Tux for help sorting this out.
 
         my $config_arch;
-        print $USER "*** CONFIGURE meta information for Perl's \%Config via config.arch\n";
+        print $LOGFILE "*** CONFIGURE meta information for Perl's \%Config via config.arch\n";
         open ($config_arch, ">>", "$build_path_perl/config.arch") and do {
                 print $config_arch qq!\
 cat >> UU/config.sh <<EOUUCONFIG
@@ -734,7 +734,7 @@ EOUUCONFIG
 
         print_and_system "cd $build_path_perl; make $DRY install";
 } else {
-        print $USER "*** SKIP building perl - already existing.\n";
+        print $USER "*** SKIP building perl - found $perl_exe\n";
 }
 
 # binaries
@@ -838,6 +838,8 @@ sub bin_cpan { $bin_cpan || "" }
 
 if ($cpan)
 {
+        print $USER "*** PREPARE cpan\n";
+
         # distroprefs: get all from git
         print_and_system "mkdir -p $DISTROPREFSSRCBASE";
         print_and_system "cd $DISTROPREFSSRCBASE && git clone $DISTROPREFSREPO";
@@ -857,6 +859,8 @@ if ($cpan)
         my $MYCFG = print_and_qx_chomp qq!$PERLDOC -l CPAN | sed -e "s/CPAN\.pm/CPAN\\/MyConfig.pm/"!;
 
         if ($forcecpancfg or ! -e $CFG) {
+                print $USER "*** CONFIGURE cpan\n";
+
                 my $CPANCFG = do { local $/; <DATA> };
                 my $MIRRORSLIST = join(" ", @CPANMIRRORS);
                 $CPANCFG =~ s/__DISTROPREFSDIR__/$DISTROPREFSDIR/g;
@@ -869,9 +873,11 @@ if ($cpan)
                 close $CPANCFGFILE;
 
                 # empty MyConfig to suppress loading one from ~/.cpan/
-                open my $MYCPANCFGFILE, ">", $CFG or die "Can not create $CFG";
+                open my $MYCPANCFGFILE, ">", $MYCFG or die "Can not create $MYCFG";
                 print $MYCPANCFGFILE "package CPAN::MyConfig;\n1;\n\n=head1 ABOUT\n\nEmpty CPAN::MyConfig to suppress loading one from C<~/.cpan/>.\n\n=cut\n\n";
                 close $MYCPANCFGFILE;
+        } else {
+                print $USER "*** SKIP configuring cpan".(-e $CFG ? " - found $CFG" : "")."\n";
         }
 
         # remove stale cpan lock
@@ -881,7 +887,7 @@ if ($cpan)
                 chomp $pid;
                 my $exists = kill 0, $pid;
                 if (not $exists) {
-                        print $USER "# Remove stale CPAN.pm lock.\n";
+                        print $LOGFILE "# Remove stale CPAN.pm lock.\n";
                         print_and_system qq!rm -f $cpanlock!;
                 }
         }
@@ -889,7 +895,7 @@ if ($cpan)
         # optionally remove sources cache to avoid conflicts,
         # like happening with hot-patched CPAN mirrors (via Pinto)
         if ($cleancpansources) {
-                print $USER "# Remove $SOURCESDIR.\n";
+                print $LOGFILE "# Remove $SOURCESDIR.\n";
                 print_and_system qq!rm -fr '$SOURCESDIR'!;
         }
 
@@ -902,12 +908,12 @@ if ($cpan)
 
         cpan_helper_setup();
 
-        # Our config fiddling seems to confuse ExtUtils::Config, probably due to cherry-picks, however it's not a real bug - so force it
-        print_and_system qq!$bin_cpan -j $CFG -f -i ExtUtils::Config!;
+        print $USER "*** INSTALL cpan dependencies\n";
 
         # install extended cpan toolchain; contains some "force" where we know they are really required
-        print_and_system qq!$bin_cpan -j $CFG YAML::XS!;
-        print_and_system qq!$bin_cpan -j $CFG YAML!;
+        print_and_system qq{if ! $PERL -MExtUtils::Config -e1 ; then $bin_cpan -j $CFG -f -i ExtUtils::Config ; fi };
+        print_and_system qq{if ! $PERL -MYAML::XS         -e1 ; then $bin_cpan -j $CFG -f -i YAML::XS         ; fi };
+        print_and_system qq{if ! $PERL -MYAML             -e1 ; then $bin_cpan -j $CFG -f -i YAML             ; fi };
 
         # try really hard with some modules until we find a version
         # that fits currrent Perl
@@ -971,6 +977,8 @@ if ($cpan)
                         print_and_system qq{if ! $PERL -M$module -e1 ; then $bin_cpan -j $CFG -f -i $module ; fi };
                 }
         }
+} else {
+        print $USER "*** SKIP bootstrapping cpan.\n";
 } # if ($cpan)
 
 # Run scripts from inside the just installed Perl
