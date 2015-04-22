@@ -250,6 +250,8 @@ and I<git-describe>.
 
 =cut
 
+$|++; # autoflush
+
 use strict;
 use warnings;
 
