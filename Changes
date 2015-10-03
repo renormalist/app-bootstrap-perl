@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.12      2015-10-03
         - install essential modules conditionally
 
 0.11      2015-04-17
