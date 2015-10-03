@@ -957,20 +957,18 @@ if ($cpan)
                 # ignore known hanging tests with utf8
                 print_and_system qq! echo "notest install Test::Simple" | $bin_cpan -j $CFG!;
         }
-        # if ($gitdescribe =~ /perl-5\.15\./) {
-        #         # ignore known failing tests
-        #         print_and_system qq!$bin_cpan -j $CFG -f -i Devel::Size!;
-        # }
-        print_and_system qq{if ! $PERL -M"version 0.97" -e1 ; then $bin_cpan -j $CFG -f -i version ; fi };
-        #print_and_system qq!$bin_cpan -j $CFG    -i CPAN::SQLite!;
-        print_and_system qq!$bin_cpan -j $CFG    -i YAML::Syck!;
-        print_and_system qq!$bin_cpan -j $CFG    -i IO::Tty!;
-        print_and_system qq!$bin_cpan -j $CFG    -i Expect!;
-        print_and_system qq!$bin_cpan -j $CFG    -i Bundle::CPAN!;
-        print_and_system qq!$bin_cpan -j $CFG    -i LWP!;
-        print_and_system qq!$bin_cpan -j $CFG    -i AAAA::Mail::SpamAssassin! if $perlformance || $perlformance_report;
 
-        # install modules from CPAN
+        # install dependencies needed for CPAN itself
+        foreach my $module (qw(version YAML::Syck IO::Tty Expect LWP Task::Bootstrap::Perl)) {
+                print $USER "$module\n";
+                print_and_system qq{if ! $PERL -M$module -e1 ; then $bin_cpan -j $CFG -f -i $module ; fi };
+        }
+        if ($perlformance || $perlformance_report) {
+                print $USER "AAAA::Mail::SpamAssassin (for Benchmark::Perl::Formance)\n";
+                print_and_system qq{if ! $PERL -MAAAA::Mail::SpamAssassin -e1 ; then $bin_cpan -j $CFG -f -i AAAA::Mail::SpamAssassin ; fi };
+        }
+
+        # install requested modules from CPAN
         foreach my $module (@MODULES) {
                 print_and_system qq!$bin_cpan -j $CFG -i $module!;
                 if ($module =~ qr/^(Benchmark::Perl::Formance|Mail::SPF)$/) {
