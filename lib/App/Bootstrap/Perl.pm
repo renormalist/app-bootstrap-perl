@@ -1,6 +1,10 @@
 package App::Bootstrap::Perl;
 # ABSTRACT: Bootstrap Perl inclusive CPAN from git
 
+use 5.006;
+use strict;
+use warnings;
+
 1;
 
 __END__

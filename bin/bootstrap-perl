@@ -252,6 +252,7 @@ and I<git-describe>.
 
 $|++; # autoflush
 
+use 5.006;
 use strict;
 use warnings;
 
