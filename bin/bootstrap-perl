@@ -981,8 +981,11 @@ if ($cpan)
 } # if ($cpan)
 
 # Run scripts from inside the just installed Perl
+print $USER "*** RUN scripts - output redirected to $logfile\n" if @RUNSCRIPTS;
 foreach my $runscript (@RUNSCRIPTS) {
-        print_and_system qq!$PREFIX/bin/$runscript !.join(" ", @RUNARGS);
+        my $cmd = qq!$PREFIX/bin/$runscript !.join(" ", @RUNARGS);
+        print $USER "# $cmd\n";
+        print_and_system $cmd;
 }
 
 __DATA__
