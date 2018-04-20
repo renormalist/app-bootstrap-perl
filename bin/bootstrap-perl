@@ -828,7 +828,7 @@ sub cpan_command {
         print $LOGFILE "cpan_command ", $cmd, "\n";
         print $CPAN_COMMAND $cmd, "\n";
         my $rc = <$CPAN_OUTPUT>;
-        defined $rc || die "could not get cpan helper output";
+        defined $rc || die "no more cpan output - module installation problem? check ~/.bootstrapperl/bootstrap-perl-build/cpan_helper.log";
         chomp $rc;
         $rc == 0 || die "rc is $rc";
 }
