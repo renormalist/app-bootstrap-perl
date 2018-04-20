@@ -499,13 +499,13 @@ if ($version =~ /^\./) {
 if ($perlformance_local) {
         $giturl             = ".";
         @default_modules    = qw(Benchmark::Perl::Formance);
-        @default_mirrors    = qw(http://perlformance.net/PINTO/perlformance/);
+        @default_mirrors    = "file://".$ENV{HOME}."/CPAN/";
         @default_runscripts = qw(benchmark-perlformance);
         @default_runargs    = ("--plugins=Fib,FibOO,DPath,Mem,Rx,Shootout::fasta,Shootout::binarytrees,Shootout::nbody,Shootout::spectralnorm");
 }
 if ($perlformance or $perlformance_report) {
         @default_modules    = qw(Task::PerlFormance);
-        @default_mirrors    = qw(http://perlformance.net/PINTO/perlformance/);
+        @default_mirrors    = "file://".$ENV{HOME}."/CPAN/";
         @default_runscripts = qw(benchmark-perlformance);
         @default_runargs    = qw(--plugins=ALL);
 }
