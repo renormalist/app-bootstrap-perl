@@ -3,6 +3,7 @@ Revision history for {{$dist->name}}
 {{$NEXT}}
         - change default mirror to $HOME/CPAN/ instead of my
           curated Pinto repo which no longer exists.
+        - refactor cpan install code
 
 0.12      2015-10-03
         - install essential modules conditionally
