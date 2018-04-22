@@ -192,6 +192,7 @@ Configure CPAN to use these mirrors:
 Install these modules from CPAN:
 
   $ bootstrap-perl --module YAML::Syck
+  $ bootstrap-perl --module YAML::Syck --forcemoduleinstall
   $ bootstrap-perl -M YAML::Syck -M Digest::SHA1 -M IO::Tty -M LWP
   $ bootstrap-perl -M YAML::Syck,Digest::SHA1 -M IO::Tty,LWP
 
@@ -289,6 +290,7 @@ my $cpan                = 1;
 my $cleancpansources    = 0;
 my $forcecpancfg        = 0;
 my $forcebuildperl      = 0;
+my $forcemoduleinstall  = 0;
 my $perlformance        = 0;
 my $perlformance_local  = 0;
 my $perlformance_report = 0;
@@ -442,6 +444,7 @@ my $ok = GetOptions (
                      "cleancpansources!" => \$cleancpansources,
                      "forcecpancfg!" => \$forcecpancfg,
                      "forcebuildperl!" => \$forcebuildperl,
+                     "forcemoduleinstall!" => \$forcemoduleinstall,
                      'perlformance' => \$perlformance,
                      'perlformance-local' => \$perlformance_local,
                      'perlformance-report' => \$perlformance_report,
@@ -985,11 +988,7 @@ if ($cpan)
 
         # install requested modules from CPAN
         foreach my $module (@MODULES) {
-                print_and_system qq!$bin_cpan -j $CFG -i $module!;
-                if ($module =~ qr/^(Benchmark::Perl::Formance|Mail::SPF)$/) {
-                        # That's the whole deal, so we force it.
-                        install_cpan_module($PERL, $bin_cpan, $CFG, 1, $module);
-                }
+                install_cpan_module($PERL, $bin_cpan, $CFG, $forcemoduleinstall, $module);
         }
 } else {
         print $USER "*** SKIP bootstrapping cpan.\n";
