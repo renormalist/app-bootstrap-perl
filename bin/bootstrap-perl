@@ -790,7 +790,7 @@ my $text_cpan_helper = <<'END_HELPER';
 
         while (my $cmd = <STDIN>) {
                 chomp $cmd;
-                print "*** COMMAND_START [$cmd]\n";
+                print "*** CPAN_COMMAND_START [$cmd]\n";
 
                 # pass cfg to run() only once
                 # run() uses @ARGV
@@ -802,7 +802,7 @@ my $text_cpan_helper = <<'END_HELPER';
                 print "cmd now [", join(" ", @ARGV),"]\n";
 
                 my $rc = App::Cpan->run(@ARGV);
-                print "*** COMMAND_END [$rc] [$cmd]\n";
+                print "*** CPAN_COMMAND_END [$rc] [$cmd]\n";
                 print $RESULT $rc, "\n";
         }
 
