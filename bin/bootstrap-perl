@@ -862,7 +862,7 @@ if ($cpan)
 
         # distroprefs: get all from git
         print_and_system "mkdir -p $DISTROPREFSSRCBASE";
-        print_and_system "cd $DISTROPREFSSRCBASE && git clone $DISTROPREFSREPO";
+        print_and_system "cd $DISTROPREFSSRCBASE && git clone $DISTROPREFSREPO" unless -d "$DISTROPREFSSRCBASE/cpanpm-distroprefs";
         print_and_system "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs && git pull";
         print_and_system "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs && git submodule update --init --recursive";
         print_and_system "cd $DISTROPREFSSRCBASE/cpanpm-distroprefs && git pull";
@@ -978,7 +978,7 @@ if ($cpan)
         }
 
         # install dependencies needed for CPAN itself
-        foreach my $module (qw(version YAML::Syck IO::Tty Expect LWP Task::Bootstrap::Perl)) {
+        foreach my $module (qw(version YAML::Syck IO::Tty Expect LWP Task::Bootstrap::Perl::CPAN)) {
                 install_cpan_module($PERL, $bin_cpan, $CFG, 1, $module);
         }
         if ($perlformance || $perlformance_report) {
