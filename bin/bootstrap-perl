@@ -781,7 +781,7 @@ my $text_cpan_helper = <<'END_HELPER';
 
         my ($result_pipe, $logfile) = @ARGV;
 
-        open(my $LOGFILE, ">", $logfile) || die;
+        open(my $LOGFILE, ">>", $logfile) || die;
         open(STDOUT, ">&", $LOGFILE) || die;
         open(STDERR, ">&", \*STDOUT) || die;
         print "*** HELPER_START ".localtime()."\n";
