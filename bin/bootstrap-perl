@@ -325,8 +325,8 @@ sub setup_user {
 sub setup_log {
         open($OLDSTDOUT, ">&", \*STDOUT) || die;
         open($OLDSTDERR, ">&", \*STDERR) || die;
-        open($LOGFILE,   ">" , $logfile) || die;
-        open($COMMAND,   ">",  $logcommand) || die;
+        open($LOGFILE,   ">>" , $logfile) || die;
+        open($COMMAND,   ">>",  $logcommand) || die;
 }
 
 # Execute a command via system(). Output goes to log file.
@@ -340,8 +340,8 @@ sub print_and_system {
         my $is_cpan = $bin eq bin_cpan();
 
         if (! $is_cpan) {
-                open(STDOUT, ">&", $LOGFILE) || die;
-                open(STDERR, ">&", $LOGFILE) || die;
+                open(STDOUT, ">>&", $LOGFILE) || die;
+                open(STDERR, ">>&", $LOGFILE) || die;
 
                 print $COMMAND $cmd, "\n";
                 print $LOGFILE $cmd, "\n";
@@ -480,7 +480,7 @@ my @default_mirrors    = (qw( http://search.cpan.org/CPAN/ ));
 return if defined($::{"no_run"});
 print $USER "\n";
 print $USER "============================================================\n";
-print $USER "Bootstrap Perl\n";
+print $USER "Bootstrap Perl - ".localtime()."\n";
 print $USER "============================================================\n";
 
 # giturl "." means clone from local dir
@@ -573,6 +573,10 @@ if ($installdeps) {
 
 system("mkdir -p $build_path") == 0 || die;
 setup_log();
+print $LOGFILE "\n";
+print $LOGFILE "============================================================\n";
+print $LOGFILE "Bootstrap Perl - ".localtime()."\n";
+print $LOGFILE "============================================================\n";
 
 if (-d "$build_path_perl/.git") {
         print_and_system "cd $build_path_perl && git config remote.origin.url $giturl";
