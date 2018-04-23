@@ -261,6 +261,7 @@ use Getopt::Long ":config", "no_ignore_case", "bundling";
 use Cwd "getcwd";
 use Sys::Hostname;
 
+my $timestamp           = ~~localtime();
 my $HOME                = $ENV{HOME} || '/opt';
 my $hostname            = hostname();
 
@@ -483,7 +484,7 @@ my @default_mirrors    = (qw( http://search.cpan.org/CPAN/ ));
 return if defined($::{"no_run"});
 print $USER "\n";
 print $USER "============================================================\n";
-print $USER "Bootstrap Perl - ".localtime()."\n";
+print $USER "Bootstrap Perl - $timestamp\n";
 print $USER "============================================================\n";
 
 # giturl "." means clone from local dir
@@ -578,7 +579,7 @@ system("mkdir -p $build_path") == 0 || die;
 setup_log();
 print $LOGFILE "\n";
 print $LOGFILE "============================================================\n";
-print $LOGFILE "Bootstrap Perl - ".localtime()."\n";
+print $LOGFILE "Bootstrap Perl - $timestamp\n";
 print $LOGFILE "============================================================\n";
 
 if (-d "$build_path_perl/.git") {
