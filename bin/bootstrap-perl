@@ -921,7 +921,7 @@ if ($cpan)
         }
 
         # force a CPAN.pm with all features we need, assume old-school CPAN.pm
-        print_and_system qq{if [ -L $bin_cpan -o ! -e $bin_cpan ] ; then /bin/rm $bin_cpan ; echo "force install CPAN" | $PERL -MCPAN -e shell ; fi};
+        print_and_system qq{if [ -L $bin_cpan -o ! -e $bin_cpan ] ; then /bin/rm -f $bin_cpan ; echo "force install CPAN" | $PERL -MCPAN -e shell ; fi};
 
         # once upon a time the cpan exe missed the executable bit - set it to be sure
         print_and_system qq!chmod +x $CPAN!;
