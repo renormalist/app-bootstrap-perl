@@ -1,6 +1,9 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - tweak timestamps in logs
+        - more robust non-existent file handling
+        - allow reinstalling modules even when existing
 
 0.14      2018-04-22
         - logs now appended - this might flood your disk, setup
