@@ -869,7 +869,7 @@ sub install_cpan_module {
 
         # remember shell bool logic, exitcode!=0 means fail means we install
 
-        if (system "$perl -M$module -e1" || $reinstall) { # already exists or reinstall
+        if (system "$perl -M$module -e1 2> /dev/null" || $reinstall) { # already exists or reinstall
             print_and_system qq{$cpan -j $cfg $_f -i $module};
         }
 }
@@ -1003,6 +1003,7 @@ if ($cpan)
 
         # install requested modules from CPAN
         foreach my $module (@MODULES) {
+                print $USER "$module\n";
                 install_cpan_module($PERL, $bin_cpan, $CFG, REINSTALL, $forcemoduleinstall, $module);
         }
 } else {
