@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.16      2019-04-26
         - no more App::Cpan usage, back to simple/stupid mode
 
 0.15      2019-04-25
