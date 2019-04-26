@@ -606,7 +606,9 @@ print_and_system "cd $build_path_perl && rm -f $build_path_perl/.git/index.lock"
 print_and_system "cd $build_path_perl && git reset --hard";
 print_and_system "cd $build_path_perl && git clean -dxf";
 print_and_system "cd $build_path_perl && git checkout blead";
+print_and_system "cd $build_path_perl && git stash";
 print_and_system "cd $build_path_perl && git pull";
+print_and_system "cd $build_path_perl && git stash";
 print_and_system "cd $build_path_perl && git checkout $version";
 print_and_system "cd $build_path_perl && git pull";
 
