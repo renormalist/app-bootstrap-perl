@@ -1,6 +1,9 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - introduce --(no)taintsupport build option to build Perl with
+          (experimental) -DNO_TAINT_SUPPORT and name subdirs
+          accordingly
 
 0.16      2019-04-26
         - no more App::Cpan usage, back to simple/stupid mode

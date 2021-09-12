@@ -160,6 +160,18 @@ which is already the default. To build Perl without 64bit use:
 
   $ bootstrap-perl --nouse64bit
 
+=head3 taint support
+
+Perl can be built without taint support (C<-DNO_TAINT_SUPPORT>).
+
+To build a Perl with taint support:
+
+  $ bootstrap-perl --taintsupport
+
+which is already the default. To build Perl without taint support use:
+
+  $ bootstrap-perl --notaintsupport
+
 =head3 version numbers vs. blead
 
 By default the Perl version number is derived from git-describe and
@@ -239,12 +251,12 @@ those benchmarks with no extra dependencies
 
 It uses a unified naming schema for it's installation PREFIX:
 
-  /$HOME/.bootstrapperl/$HOSTNAME/perl-5.<VERSION>-<(no)?thread>-<(no)?64bit>-<git-describe>
+  /$HOME/.bootstrapperl/$HOSTNAME/perl-5.<VERSION>-<(no)?thread>-<(no)?64bit>-<(no)?taint>-<git-describe>
 
 which leads to paths like this:
 
-  /home/ss5/.bootstrapperl/zomtec/perl-5.10-thread-64bit-v5.10.0
-  /home/ss5/.bootstrapperl/zomtec/perl-5.15-thread-64bit-v5.15.5-258-ge7d0a3f
+  /home/ss5/.bootstrapperl/zomtec/perl-5.10-thread-64bit-taint-v5.10.0
+  /home/ss5/.bootstrapperl/zomtec/perl-5.15-thread-64bit-taint-v5.15.5-258-ge7d0a3f
 
 This naming schema consist of the major version, basic configuration
 and I<git-describe>.
@@ -285,6 +297,7 @@ my $sourcetgz           = "/var/tmp/perl.tar.gz";
 my $blead               = 0;
 my $usethreads          = 1;
 my $bit64               = 1;
+my $taintsupport        = 1;
 my $help                = 0;
 my $test                = 0;
 my $cpan                = 1;
@@ -398,17 +411,18 @@ sub print_and_qx_chomp {
 }
 
 sub _perl_base_name {
-        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitdescribe, $gitchangeset, $exe_suffixes, $blead) = @_;
+        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $taintsupport, $gitdescribe, $gitchangeset, $exe_suffixes, $blead) = @_;
         return join("-",
                     ($blead      ? "blead" : "$perl_revision.$perl_version"),
                     ($usethreads ? "" : "no" )."thread",
                     ($bit64      ? "" : "no" )."64bit",
+                    ($taintsupport ? "" : "no" )."taint",
                     @$exe_suffixes,
                    );
 }
 
 sub _perl_exe_name {
-        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitdescribe, $gitchangeset, $exe_suffixes, $blead) = @_;
+        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $taintsupport, $gitdescribe, $gitchangeset, $exe_suffixes, $blead) = @_;
 
         return join("-",
                     "perl",
@@ -417,7 +431,7 @@ sub _perl_exe_name {
 }
 
 sub _perl_pathprefix {
-        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitdescribe, $gitchangeset, $exe_suffixes, $blead) = @_;
+        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $taintsupport, $gitdescribe, $gitchangeset, $exe_suffixes, $blead) = @_;
 
         return join("-",
                     $prefixbase."/perl",
@@ -441,6 +455,7 @@ my $ok = GetOptions (
                      "blead!"       => \$blead,
                      "usethreads!"  => \$usethreads,
                      "use64bit!"    => \$bit64,
+                     "taintsupport!" => \$taintsupport,
                      "help|h"       => \$help,
                      "jobs|j=i"     => \$jobs,
                      "test|t"       => \$test,
@@ -651,10 +666,11 @@ unless (defined $perl_revision && defined $perl_version)
         exit 1;
 }
 
-my $codespeed_executable =            _perl_exe_name  ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitdescribe, $gitchangeset, \@EXESUFFIXES, $blead);
-my $PREFIX               = $prefix || _perl_pathprefix($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $gitdescribe, $gitchangeset, \@EXESUFFIXES, $blead);
+my $codespeed_executable =            _perl_exe_name  ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $taintsupport, $gitdescribe, $gitchangeset, \@EXESUFFIXES, $blead);
+my $PREFIX               = $prefix || _perl_pathprefix($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $taintsupport, $gitdescribe, $gitchangeset, \@EXESUFFIXES, $blead);
 my $USETHREADS           = $usethreads ? "-Dusethreads"  : "";
 my $BIT64                = $bit64      ? "-Duse64bitall" : "";
+my $TAINTSUPPORT         = $taintsupport ? "" : "-DNO_TAINT_SUPPORT";
 
 print $USER "\n";
 print $USER "============================================================\n\n";
@@ -732,7 +748,7 @@ EOUUCONFIG
 
         # ========== Configure ==========
 
-        print_and_system_out "cd $build_path_perl; sh Configure -der -Dusedevel $USETHREADS $BIT64 $CONFARGS -Dprefix=$PREFIX";
+        print_and_system_out "cd $build_path_perl; sh Configure -der -Dusedevel $USETHREADS $BIT64 $TAINTSUPPORT $CONFARGS -Dprefix=$PREFIX";
 
         # ========== make ==========
 
