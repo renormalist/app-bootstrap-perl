@@ -883,6 +883,8 @@ if ($cpan)
         print $USER "*** INSTALL cpan dependencies\n";
 
         # install extended cpan toolchain; contains some "force" where we know they are really required
+        install_cpan_module($PERL, $bin_cpan, $CFG, NO_REINSTALL, FORCE, "CPAN::DistnameInfo");
+        install_cpan_module($PERL, $bin_cpan, $CFG, NO_REINSTALL, FORCE, "HTTP::Date");
         install_cpan_module($PERL, $bin_cpan, $CFG, NO_REINSTALL, FORCE, "ExtUtils::Config");
         install_cpan_module($PERL, $bin_cpan, $CFG, NO_REINSTALL, FORCE, "YAML::XS");
         install_cpan_module($PERL, $bin_cpan, $CFG, NO_REINSTALL, FORCE, "YAML");
@@ -890,7 +892,8 @@ if ($cpan)
         # try really hard with some modules until we find a version
         # that fits currrent Perl
         my %mod_dists = (
-                         "YAML" => [qw(MSTROUT/YAML-0.84.tar.gz
+                         "YAML" => [qw(TINITA/YAML-1.30.tar.gz
+                                       MSTROUT/YAML-0.84.tar.gz
                                        MSTROUT/YAML-0.83.tar.gz
                                        MSTROUT/YAML-0.82.tar.gz
                                        INGY/YAML-0.81.tar.gz
