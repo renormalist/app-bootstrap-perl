@@ -780,22 +780,33 @@ my $POD2TEXT = print_and_qx_chomp qq!ls -drt1 $PREFIX/bin/pod2text5.*.* | tail -
 my $CFG   = print_and_qx_chomp qq!$PERLDOC -l CPAN | sed -e "s/CPAN\.pm/CPAN\\/Config.pm/"!;
 my $MYCFG = print_and_qx_chomp qq!$PERLDOC -l CPAN | sed -e "s/CPAN\.pm/CPAN\\/MyConfig.pm/"!;
 
-print $USER "# CPAN:     $CPAN\n";
-print $USER "# PERL:     $PERL\n";
-print $USER "# PERLDOC:  $PERLDOC\n";
-print $USER "# POD2TEXT: $POD2TEXT\n";
-print $USER "# CPANCFG:  $CFG\n";
-
 my $bin_perl     = "$PREFIX/bin/perl";
 my $bin_cpan     = "$PREFIX/bin/cpan";
 my $bin_perldoc  = "$PREFIX/bin/perldoc";
 my $bin_pod2text = "$PREFIX/bin/pod2text";
+my $bin_mycpan   = "$PREFIX/bin/mycpan";
 
 # some dists don't find the versioned developer files
 print_and_system "if [ ! -e $bin_perl     ] ; then ln -sf $PERL     $bin_perl     ; echo Created symlink $bin_perl ; else echo Already exists: $bin_perl ; fi";
 print_and_system "if [ ! -e $bin_cpan     ] ; then ln -sf $CPAN     $bin_cpan     ; echo Created symlink $bin_cpan ; else echo Already exists: $bin_cpan ; fi";
 print_and_system "if [ ! -e $bin_perldoc  ] ; then ln -sf $PERLDOC  $bin_perldoc  ; echo Created symlink $bin_perldoc ; else echo Already exists: $bin_perldoc ; fi";
 print_and_system "if [ ! -e $bin_pod2text ] ; then ln -sf $POD2TEXT $bin_pod2text ; echo Created symlink $bin_pod2text ; else echo Already exists: $bin_pod2text ; fi";
+
+# our own cpan cmd with explicit config
+if (not -e $bin_mycpan) {
+  open (my $MYCPAN, '>', $bin_mycpan) or die "Can not create $bin_mycpan";
+  print $MYCPAN qq{#! /bin/bash\n};
+  print $MYCPAN qq{$CPAN -j $CFG "\$\@"\n};
+  close $MYCPAN;
+  print_and_system qq!chmod +x $bin_mycpan!;
+}
+
+print $USER "# PERL:     $PERL\n";
+print $USER "# CPAN:     $CPAN\n";
+print $USER "# MYCPAN:   $bin_mycpan\n";
+print $USER "# PERLDOC:  $PERLDOC\n";
+print $USER "# POD2TEXT: $POD2TEXT\n";
+print $USER "# CPANCFG:  $CFG\n";
 
 sub bin_cpan { $bin_cpan || "" }
 
