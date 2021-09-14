@@ -670,7 +670,7 @@ my $codespeed_executable =            _perl_exe_name  ($perl_revision, $perl_ver
 my $PREFIX               = $prefix || _perl_pathprefix($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $taintsupport, $gitdescribe, $gitchangeset, \@EXESUFFIXES, $blead);
 my $USETHREADS           = $usethreads ? "-Dusethreads"  : "";
 my $BIT64                = $bit64      ? "-Duse64bitall" : "";
-my $TAINTSUPPORT         = $taintsupport ? "" : "-DNO_TAINT_SUPPORT";
+my $TAINTSUPPORT         = $taintsupport ? "" : "-Accflags=-DNO_TAINT_SUPPORT";
 
 print $USER "\n";
 print $USER "============================================================\n\n";
