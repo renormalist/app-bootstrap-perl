@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.17      2021-09-16
         - introduce --(no)taintsupport build option to build Perl
           with -DNO_TAINT_SUPPORT and name subdirs accordingly
         - generate 'mycpan' wrapper tool which pre-points to Config
