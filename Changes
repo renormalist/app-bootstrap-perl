@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+        - additional --silentnotaint build option
 
 0.17      2021-09-16
         - introduce --(no)taintsupport build option to build Perl

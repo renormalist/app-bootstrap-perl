@@ -162,15 +162,23 @@ which is already the default. To build Perl without 64bit use:
 
 =head3 taint support
 
-Perl can be built without taint support (C<-DNO_TAINT_SUPPORT>).
+Perl can be built without taint support (C<-DNO_TAINT_SUPPORT>, C<-DSILENT_NO_TAINT_SUPPORT>).
 
 To build a Perl with taint support:
 
   $ bootstrap-perl --taintsupport
 
-which is already the default. To build Perl without taint support use:
+which is already the default.
+
+To build Perl without taint support use:
 
   $ bootstrap-perl --notaintsupport
+
+To make the notaintsupport silent, combine it with --silentnotaint:
+
+  $ bootstrap-perl --notaintsupport --silentnotaint
+
+(sic, both are needed).
 
 =head3 version numbers vs. blead
 
@@ -298,6 +306,7 @@ my $blead               = 0;
 my $usethreads          = 1;
 my $bit64               = 1;
 my $taintsupport        = 1;
+my $silentnotaint       = 0;
 my $help                = 0;
 my $test                = 0;
 my $cpan                = 1;
@@ -411,18 +420,18 @@ sub print_and_qx_chomp {
 }
 
 sub _perl_base_name {
-        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $taintsupport, $gitdescribe, $gitchangeset, $exe_suffixes, $blead) = @_;
+        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $taintsupport, $silentnotaint, $gitdescribe, $gitchangeset, $exe_suffixes, $blead) = @_;
         return join("-",
                     ($blead      ? "blead" : "$perl_revision.$perl_version"),
                     ($usethreads ? "" : "no" )."thread",
                     ($bit64      ? "" : "no" )."64bit",
-                    ($taintsupport ? "" : "no" )."taint",
+                    ($taintsupport ? "" : (($silentnotaint ? "silent" : "")."no"))."taint",
                     @$exe_suffixes,
                    );
 }
 
 sub _perl_exe_name {
-        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $taintsupport, $gitdescribe, $gitchangeset, $exe_suffixes, $blead) = @_;
+        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $taintsupport, $silentnotaint, $gitdescribe, $gitchangeset, $exe_suffixes, $blead) = @_;
 
         return join("-",
                     "perl",
@@ -431,7 +440,7 @@ sub _perl_exe_name {
 }
 
 sub _perl_pathprefix {
-        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $taintsupport, $gitdescribe, $gitchangeset, $exe_suffixes, $blead) = @_;
+        my ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $taintsupport, $silentnotaint, $gitdescribe, $gitchangeset, $exe_suffixes, $blead) = @_;
 
         return join("-",
                     $prefixbase."/perl",
@@ -456,6 +465,7 @@ my $ok = GetOptions (
                      "usethreads!"  => \$usethreads,
                      "use64bit!"    => \$bit64,
                      "taintsupport!" => \$taintsupport,
+                     "silentnotaint!" => \$silentnotaint,
                      "help|h"       => \$help,
                      "jobs|j=i"     => \$jobs,
                      "test|t"       => \$test,
@@ -666,11 +676,11 @@ unless (defined $perl_revision && defined $perl_version)
         exit 1;
 }
 
-my $codespeed_executable =            _perl_exe_name  ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $taintsupport, $gitdescribe, $gitchangeset, \@EXESUFFIXES, $blead);
-my $PREFIX               = $prefix || _perl_pathprefix($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $taintsupport, $gitdescribe, $gitchangeset, \@EXESUFFIXES, $blead);
+my $codespeed_executable =            _perl_exe_name  ($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $taintsupport, $silentnotaint, $gitdescribe, $gitchangeset, \@EXESUFFIXES, $blead);
+my $PREFIX               = $prefix || _perl_pathprefix($perl_revision, $perl_version, $perl_subversion, $usethreads, $bit64, $taintsupport, $silentnotaint, $gitdescribe, $gitchangeset, \@EXESUFFIXES, $blead);
 my $USETHREADS           = $usethreads ? "-Dusethreads"  : "";
 my $BIT64                = $bit64      ? "-Duse64bitall" : "";
-my $TAINTSUPPORT         = $taintsupport ? "" : "-Accflags=-DNO_TAINT_SUPPORT";
+my $TAINTSUPPORT         = $taintsupport ? "" : ($silentnotaint ? "-Accflags=-DSILENT_NO_TAINT_SUPPORT" : "-Accflags=-DNO_TAINT_SUPPORT");
 
 print $USER "\n";
 print $USER "============================================================\n\n";
