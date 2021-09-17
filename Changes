@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.18      2021-09-17
         - additional --silentnotaint build option
 
 0.17      2021-09-16
